@@ -1,0 +1,253 @@
+{
+  "info": {
+    "name": "Early Intervention GenAI API",
+    "description": "FastAPI backend for Early Intervention GenAI prototype with RAG-powered intervention planning",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. Root - API Info",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8081/",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8081",
+          "path": [""]
+        },
+        "description": "Get API information and available endpoints"
+      }
+    },
+    {
+      "name": "2. Upload Knowledge Base",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "file",
+              "type": "file",
+              "src": "/path/to/your/file.txt",
+              "description": "Upload a .txt or .md file as knowledge base"
+            }
+          ]
+        },
+        "url": {
+          "raw": "http://localhost:8081/api/rag/upload",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8081",
+          "path": ["api", "rag", "upload"]
+        },
+        "description": "Upload a knowledge base file (.txt or .md) to use for RAG retrieval"
+      }
+    },
+    {
+      "name": "3. Generate Plan - 24mo Communication",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"age_months\": 24,\n  \"domain\": \"communication\",\n  \"extra_info\": \"struggles with two-word combinations and following simple directions\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8081/api/plan",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8081",
+          "path": ["api", "plan"]
+        },
+        "description": "Generate intervention plan for 24-month-old with communication delays"
+      }
+    },
+    {
+      "name": "4. Generate Plan - 18mo Fine Motor",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"age_months\": 18,\n  \"domain\": \"fine_motor\",\n  \"extra_info\": \"difficulty with pincer grasp and stacking blocks\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8081/api/plan",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8081",
+          "path": ["api", "plan"]
+        },
+        "description": "Generate intervention plan for 18-month-old with fine motor delays"
+      }
+    },
+    {
+      "name": "5. Generate Plan - 30mo Social",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"age_months\": 30,\n  \"domain\": \"social\",\n  \"extra_info\": \"limited peer interaction, prefers parallel play\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8081/api/plan",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8081",
+          "path": ["api", "plan"]
+        },
+        "description": "Generate intervention plan for 30-month-old with social interaction delays"
+      }
+    },
+    {
+      "name": "6. Chat - New Session (Following Directions)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"message\": \"How can I help my 18-month-old learn to follow simple directions?\",\n  \"age_months\": 18,\n  \"domain\": \"communication\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8081/api/chat",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8081",
+          "path": ["api", "chat"]
+        },
+        "description": "Start new chat session - save the session_id from response for follow-ups"
+      }
+    },
+    {
+      "name": "7. Chat - Continue Session (Mealtime)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"message\": \"What about during mealtime specifically?\",\n  \"session_id\": \"PASTE_SESSION_ID_HERE\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8081/api/chat",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8081",
+          "path": ["api", "chat"]
+        },
+        "description": "Continue existing chat session - replace PASTE_SESSION_ID_HERE with actual session_id"
+      }
+    },
+    {
+      "name": "8. Chat - Frustration Management",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"message\": \"My child gets frustrated when trying to communicate. What can I do?\",\n  \"age_months\": 24,\n  \"domain\": \"communication\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8081/api/chat",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8081",
+          "path": ["api", "chat"]
+        },
+        "description": "New chat about managing communication frustration"
+      }
+    },
+    {
+      "name": "9. Chat - Playtime Strategies",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"message\": \"What are some good activities to encourage fine motor development during playtime?\",\n  \"age_months\": 20,\n  \"domain\": \"fine_motor\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8081/api/chat",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8081",
+          "path": ["api", "chat"]
+        },
+        "description": "Chat about fine motor development activities"
+      }
+    },
+    {
+      "name": "10. Generate Plan - Form Data (Alternative)",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            {
+              "key": "age_months",
+              "value": "24",
+              "type": "text"
+            },
+            {
+              "key": "domain",
+              "value": "communication",
+              "type": "text"
+            },
+            {
+              "key": "extra_info",
+              "value": "limited vocabulary, difficulty with turn-taking",
+              "type": "text"
+            }
+          ]
+        },
+        "url": {
+          "raw": "http://localhost:8081/api/plan",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8081",
+          "path": ["api", "plan"]
+        },
+        "description": "Alternative: Send plan request as form data instead of JSON"
+      }
+    }
+  ]
+}

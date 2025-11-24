@@ -1,0 +1,107 @@
+import React from 'react';
+import {
+  Box,
+  Button,
+  Typography,
+  List,
+  ListItemButton,
+  ListItemText,
+  Radio,
+} from '@mui/material';
+
+/**
+ * Sidebar Component (Left Column)
+ * Fixed width 280px
+ * Contains: Title bar, "New chat" button, and Chat History list
+ */
+function Sidebar({ sessions, activeSessionId, onNewChat, onSelectSession }) {
+  return (
+    <Box
+      sx={{
+        width: 280,
+        height: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
+        borderRight: '1px solid rgba(255, 255, 255, 0.12)',
+      }}
+    >
+      {/* Title Bar */}
+      <Box
+        sx={{
+          p: 2,
+          borderBottom: '1px solid rgba(255, 255, 255, 0.12)',
+        }}
+      >
+        <Typography variant="h6" sx={{ fontWeight: 600 }}>
+          Early Intervention AI
+        </Typography>
+      </Box>
+
+      {/* New Chat Button */}
+      <Box sx={{ p: 2, pb: 1 }}>
+        <Button
+          fullWidth
+          variant="outlined"
+          onClick={onNewChat}
+          sx={{ justifyContent: 'flex-start', py: 1 }}
+        >
+          New chat
+        </Button>
+      </Box>
+
+      {/* Chat History */}
+      <Box sx={{ flex: 1, overflow: 'auto', px: 2 }}>
+        <Typography
+          variant="subtitle2"
+          sx={{
+            color: 'text.secondary',
+            mb: 1,
+            mt: 1,
+            fontSize: '0.75rem',
+            textTransform: 'uppercase',
+            letterSpacing: 1,
+          }}
+        >
+          Chat History
+        </Typography>
+
+        <List disablePadding>
+          {sessions.map((session) => (
+            <ListItemButton
+              key={session.id}
+              selected={session.id === activeSessionId}
+              onClick={() => onSelectSession(session.id)}
+              sx={{
+                borderRadius: 1,
+                mb: 0.5,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1,
+              }}
+            >
+              <Radio
+                checked={session.id === activeSessionId}
+                size="small"
+                sx={{ p: 0 }}
+              />
+              <ListItemText
+                primary={session.title}
+                primaryTypographyProps={{
+                  fontSize: '0.875rem',
+                  noWrap: true,
+                  sx: {
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                  },
+                }}
+              />
+            </ListItemButton>
+          ))}
+        </List>
+      </Box>
+    </Box>
+  );
+}
+
+export default Sidebar;
