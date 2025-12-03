@@ -27,7 +27,8 @@ const MAX_CHATS = 25;
  *     id: 'uuid',
  *     title: 'New Chat',
  *     age_months: null,
- *     domain: null,
+ *     domains: [],
+ *     notes: '',
  *     plan: {...},
  *     messages: [{role, content}]
  *   }
@@ -61,10 +62,29 @@ function App() {
     if (stored) {
       try {
         const parsed = JSON.parse(stored);
-        setChats(parsed);
+        
+        // Migrate old data structure: convert domain (string) to domains (array)
+        const migratedChats = parsed.map(chat => {
+          if (chat.domain && !chat.domains) {
+            // Old format: has domain but not domains
+            return {
+              ...chat,
+              domains: [chat.domain],
+              notes: chat.notes || '',
+            };
+          }
+          // Ensure domains and notes exist
+          return {
+            ...chat,
+            domains: chat.domains || [],
+            notes: chat.notes || '',
+          };
+        });
+        
+        setChats(migratedChats);
         // Set first chat as active
-        if (parsed.length > 0) {
-          setActiveChatId(parsed[0].id);
+        if (migratedChats.length > 0) {
+          setActiveChatId(migratedChats[0].id);
         }
       } catch (e) {
         console.error('Failed to parse chats:', e);
@@ -112,7 +132,8 @@ function App() {
       title: 'New Chat',
       createdAt: Date.now(),
       age_months: null,
-      domain: null,
+      domains: [],
+      notes: '',
       plan: null,
       messages: [],
     };
@@ -173,18 +194,34 @@ function App() {
       return;
     }
 
-    if (!chat.age_months || !chat.domain) {
-      showSnackbar('Please select age and domain', 'warning');
+    console.log('Current chat:', chat);
+    console.log('Domains:', chat.domains, 'Type:', typeof chat.domains, 'IsArray:', Array.isArray(chat.domains));
+    
+    if (!chat.age_months || !chat.domains || chat.domains.length === 0) {
+      showSnackbar('Please select age and at least one area of concern', 'warning');
       return;
     }
 
     setIsGenerating(true);
 
     try {
-      const result = await generatePlan({
+      // Ensure domains is an array and has values
+      const domainsArray = Array.isArray(chat.domains) ? chat.domains : [];
+      
+      if (domainsArray.length === 0) {
+        showSnackbar('Please select at least one area of concern', 'warning');
+        setIsGenerating(false);
+        return;
+      }
+      
+      const payload = {
         age_months: chat.age_months,
-        domain: chat.domain,
-      });
+        domains: domainsArray,
+        notes: chat.notes || null,
+      };
+      console.log('Sending plan request:', payload);
+      
+      const result = await generatePlan(payload);
 
       // Format the plan as a message
       const formattedMessage = `**🎯 Goals**\n\n${result.Goals}\n\n---\n\n**⚡ Strategies**\n\n${result.Strategies}\n\n---\n\n**💡 Advice for Parents**\n\n${result['Advice for Parents'] || result.Advice_for_Parents}`;
@@ -199,9 +236,8 @@ function App() {
       ];
 
       // Update chat with messages and title
-      const title = `${chat.age_months} month old – ${chat.domain
-        .replace('_', ' ')
-        .replace(/\b\w/g, (l) => l.toUpperCase())}`;
+      const domainsText = chat.domains.map(d => d.replace('_', ' ').replace(/\b\w/g, (l) => l.toUpperCase())).join(', ');
+      const title = `${chat.age_months} month old – ${domainsText}`;
 
       updateChat({
         plan: result,
@@ -236,7 +272,8 @@ function App() {
     try {
       const result = await sendChat(userMessage, chat.id, {
         age_months: chat.age_months,
-        domain: chat.domain,
+        domains: chat.domains,
+        notes: chat.notes,
       });
 
       // Add AI response
@@ -283,7 +320,8 @@ function App() {
           <RightPane
             chatTitle={activeChat.title}
             ageMonths={activeChat.age_months}
-            domain={activeChat.domain}
+            domains={activeChat.domains}
+            notes={activeChat.notes}
             plan={activeChat.plan}
             messages={activeChat.messages}
             chatMessage={chatMessage}
@@ -294,7 +332,8 @@ function App() {
             onToggleSidebar={toggleSidebar}
             onToggleTheme={toggleTheme}
             onAgeChange={(value) => updateChat({ age_months: value !== '' ? parseInt(value) : null })}
-            onDomainChange={(value) => updateChat({ domain: value !== '' ? value : null })}
+            onDomainsChange={(values) => updateChat({ domains: values })}
+            onNotesChange={(value) => updateChat({ notes: value })}
             onGenerate={handleGenerate}
             onChatMessageChange={setChatMessage}
             onSendMessage={handleSendMessage}

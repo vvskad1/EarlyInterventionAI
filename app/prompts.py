@@ -55,7 +55,7 @@ Guidelines:
     return prompt
 
 
-def chat_system_prompt(context: str) -> str:
+def chat_system_prompt(context: str, age_months: int = None, domain: str = None, notes: str = None) -> str:
     """
     Generate system prompt for conversational chat interactions.
     
@@ -64,6 +64,9 @@ def chat_system_prompt(context: str) -> str:
     
     Args:
         context: RAG context to include in prompt
+        age_months: Child's age in months (optional)
+        domain: Development domain(s) - can be comma-separated (optional)
+        notes: Additional notes about the child (optional)
         
     Returns:
         Complete system prompt string
@@ -87,6 +90,14 @@ Key principles:
 
 Keep responses concise (2-4 paragraphs unless more detail is requested).
 """
+    
+    # Add child context if provided
+    if age_months is not None and domain is not None:
+        domain_label = domain.replace('_', ' ').title()
+        prompt += f"\n\n[CHILD CONTEXT]\nYou are discussing a {age_months}-month-old child with concerns in: {domain_label}."
+        if notes:
+            prompt += f"\n\nNotes about this child: {notes}"
+        prompt += "\n\nKeep this specific child in mind throughout the conversation and reference their age, areas of concern, and any notes when relevant.\n"
     
     # Add RAG context if provided
     if context.strip():

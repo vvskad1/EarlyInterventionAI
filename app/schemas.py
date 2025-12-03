@@ -1,21 +1,23 @@
 """
 Pydantic models for request/response validation.
 """
-from typing import Optional
+from typing import Optional, List
 from pydantic import BaseModel, Field
 
 
 class PlanRequest(BaseModel):
     """Request model for generating intervention plans."""
     age_months: int = Field(..., ge=0, le=36, description="Child's age in months (0-36)")
-    domain: str = Field(..., description="Development domain (e.g., fine_motor, gross_motor, social, communication, cognitive, adaptive)")
+    domains: List[str] = Field(..., min_length=1, description="List of development domains (e.g., fine_motor, gross_motor, social, communication, cognitive, adaptive)")
+    notes: Optional[str] = Field(None, description="Additional notes or observations about the child")
     extra_info: Optional[str] = Field(None, description="Additional context or information")
 
     class Config:
         json_schema_extra = {
             "example": {
                 "age_months": 24,
-                "domain": "communication",
+                "domains": ["communication", "social"],
+                "notes": "Child is shy in group settings; prefers parallel play",
                 "extra_info": "struggles to follow one-step directions; bilingual home"
             }
         }
@@ -43,14 +45,15 @@ class ChatRequest(BaseModel):
     message: str = Field(..., description="User's message")
     session_id: Optional[str] = Field(None, description="Session ID for conversation continuity (auto-generated if missing)")
     age_months: Optional[int] = Field(None, ge=0, le=36, description="Child's age in months for context (optional)")
-    domain: Optional[str] = Field(None, description="Development domain for context (optional)")
+    domains: Optional[List[str]] = Field(None, description="List of development domains for context (optional)")
+    notes: Optional[str] = Field(None, description="Notes about the child for context (optional)")
 
     class Config:
         json_schema_extra = {
             "example": {
                 "message": "How do I reduce frustration during cleanup?",
                 "age_months": 24,
-                "domain": "communication"
+                "domains": ["communication", "social"]
             }
         }
 

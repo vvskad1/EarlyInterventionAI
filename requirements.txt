@@ -4,3 +4,11 @@ pydantic
 python-dotenv
 httpx
 python-multipart
+
+# LangChain and dependencies
+langchain>=0.1.0
+langchain-groq>=0.1.0
+langchain-community>=0.0.10
+chromadb>=0.4.22
+sentence-transformers>=2.2.2
+tiktoken>=0.5.2

@@ -1,14 +1,15 @@
 """
-RAG (Retrieval-Augmented Generation) implementation for knowledge base retrieval.
+RAG (Retrieval-Augmented Generation) implementation using LangChain and ChromaDB.
 
-Implements naive retrieval using:
-- Fixed-size text chunking
-- Token overlap scoring
-- Top-k context concatenation
+Implements semantic search using:
+- ChromaDB vector store
+- HuggingFace embeddings
+- Semantic similarity search
 """
 import os
 from pathlib import Path
-from typing import List, Optional
+from typing import Optional
+from app.vector_store import get_vector_store, initialize_vector_store_from_kb
 
 
 def ensure_kb_directory():
@@ -26,113 +27,6 @@ def get_kb_file_path() -> str:
     """
     kb_file = os.getenv("KB_FILE", "./kb/knowledge_base.txt")
     return str(Path(kb_file).resolve())
-
-
-def load_kb_text() -> str:
-    """
-    Load the knowledge base text from file.
-    
-    Returns:
-        Knowledge base text content, or empty string if file doesn't exist
-    """
-    kb_path = get_kb_file_path()
-    
-    try:
-        with open(kb_path, "r", encoding="utf-8") as f:
-            return f.read()
-    except FileNotFoundError:
-        return ""
-    except Exception as e:
-        print(f"Warning: Error reading KB file: {e}")
-        return ""
-
-
-def chunk_text(text: str, size: int = 1000) -> List[str]:
-    """
-    Split text into chunks of approximately equal size.
-    
-    Simple chunking strategy: split on newlines first, then combine
-    into chunks that don't exceed size. This preserves paragraph boundaries
-    when possible.
-    
-    Args:
-        text: Text to chunk
-        size: Target size for each chunk (approximate)
-        
-    Returns:
-        List of text chunks
-    """
-    if not text.strip():
-        return []
-    
-    # Split into paragraphs (double newline) or lines
-    paragraphs = text.split("\n\n")
-    if len(paragraphs) == 1:
-        # No paragraph breaks, try single newlines
-        paragraphs = text.split("\n")
-    
-    chunks = []
-    current_chunk = ""
-    
-    for para in paragraphs:
-        para = para.strip()
-        if not para:
-            continue
-            
-        # If adding this paragraph would exceed size, save current chunk
-        if current_chunk and len(current_chunk) + len(para) + 2 > size:
-            chunks.append(current_chunk)
-            current_chunk = para
-        else:
-            # Add to current chunk
-            if current_chunk:
-                current_chunk += "\n\n" + para
-            else:
-                current_chunk = para
-    
-    # Add remaining chunk
-    if current_chunk:
-        chunks.append(current_chunk)
-    
-    return chunks
-
-
-def tokenize_simple(text: str) -> set:
-    """
-    Simple tokenization: lowercase, split on whitespace and punctuation.
-    
-    Args:
-        text: Text to tokenize
-        
-    Returns:
-        Set of tokens
-    """
-    # Convert to lowercase
-    text = text.lower()
-    
-    # Replace punctuation with spaces
-    for char in ".,!?;:()[]{}\"'":
-        text = text.replace(char, " ")
-    
-    # Split and return unique tokens
-    tokens = set(text.split())
-    return tokens
-
-
-def score_chunk(query_tokens: set, chunk_text: str) -> int:
-    """
-    Score a chunk based on token overlap with query.
-    
-    Args:
-        query_tokens: Set of query tokens
-        chunk_text: Text chunk to score
-        
-    Returns:
-        Overlap score (number of matching tokens)
-    """
-    chunk_tokens = tokenize_simple(chunk_text)
-    overlap = query_tokens & chunk_tokens  # Set intersection
-    return len(overlap)
 
 
 def build_query(
@@ -167,13 +61,13 @@ def build_query(
             if months > 1:
                 parts[-1] += "s"
         
-        parts.append(f"{age_months} months")
+        parts.append(f"child age {age_months} months")
     
     if domain:
         parts.append(domain)
         # Add common variations/synonyms
         domain_lower = domain.lower().replace("_", " ")
-        parts.append(domain_lower)
+        parts.append(f"development domain {domain_lower}")
     
     if extra_info:
         parts.append(extra_info)
@@ -181,73 +75,96 @@ def build_query(
     return " ".join(parts)
 
 
+def initialize_kb() -> int:
+    """
+    Initialize vector store from knowledge base file.
+    
+    Returns:
+        Number of chunks ingested, or 0 if failed
+    """
+    kb_path = get_kb_file_path()
+    
+    if not Path(kb_path).exists():
+        print(f"⚠ Knowledge base file not found: {kb_path}")
+        return 0
+    
+    try:
+        num_chunks = initialize_vector_store_from_kb(kb_path)
+        print(f"✓ Initialized vector store with {num_chunks} chunks from {kb_path}")
+        return num_chunks
+    except Exception as e:
+        print(f"⚠ Error initializing vector store: {e}")
+        return 0
+
+
 def retrieve_context(
     age_months: Optional[int] = None,
     domain: Optional[str] = None,
     extra_info: Optional[str] = None,
-    budget: int = 6000
+    budget: int = 6000,
+    k: int = 4
 ) -> str:
     """
-    Retrieve relevant context from knowledge base using naive RAG.
+    Retrieve relevant context from vector store using semantic search.
     
     Args:
         age_months: Child's age in months
         domain: Development domain
         extra_info: Additional context
-        budget: Maximum characters to return
+        budget: Maximum characters to return (approximate)
+        k: Number of top chunks to retrieve
         
     Returns:
-        Concatenated context from top-scoring chunks
+        Concatenated context from top-k semantically similar chunks
     """
-    # Load KB
-    kb_text = load_kb_text()
-    if not kb_text.strip():
-        return ""
+    # Get vector store
+    vector_store = get_vector_store()
     
-    # Build query and tokenize
+    # Check if vector store has any data
+    count = vector_store.get_collection_count()
+    if count == 0:
+        # Try to initialize from KB file
+        print("Vector store is empty, initializing from KB file...")
+        num_chunks = initialize_kb()
+        if num_chunks == 0:
+            return ""
+    
+    # Build query
     query = build_query(age_months, domain, extra_info)
-    query_tokens = tokenize_simple(query)
     
-    # Chunk KB
-    chunks = chunk_text(kb_text)
-    if not chunks:
-        return ""
-    
-    # Score all chunks
-    scored_chunks = []
-    for chunk in chunks:
-        score = score_chunk(query_tokens, chunk)
-        scored_chunks.append((score, chunk))
-    
-    # Sort by score (descending)
-    scored_chunks.sort(key=lambda x: x[0], reverse=True)
-    
-    # Concatenate top chunks until budget is reached
-    context_parts = []
-    total_chars = 0
-    
-    for score, chunk in scored_chunks:
-        # Skip chunks with zero overlap if we already have some context
-        if score == 0 and context_parts:
-            continue
+    # Perform semantic search
+    try:
+        # Get more chunks initially, then filter by budget
+        documents = vector_store.semantic_search(query, k=k*2)
+        
+        if not documents:
+            return ""
+        
+        # Concatenate chunks until budget is reached
+        context_parts = []
+        total_chars = 0
+        
+        for doc in documents:
+            chunk_text = doc.page_content
+            chunk_len = len(chunk_text)
             
-        chunk_len = len(chunk)
-        
-        # Check if adding this chunk would exceed budget
-        if total_chars + chunk_len > budget:
-            # Try to add partial chunk if we don't have any context yet
-            if not context_parts:
-                remaining = budget - total_chars
-                context_parts.append(chunk[:remaining] + "...")
+            # Check if adding this chunk would exceed budget
+            if total_chars + chunk_len > budget:
+                # If we don't have any context yet, add partial chunk
+                if not context_parts:
+                    remaining = budget - total_chars
+                    context_parts.append(chunk_text[:remaining] + "...")
                 break
-            else:
+            
+            context_parts.append(chunk_text)
+            total_chars += chunk_len + 2  # +2 for separator
+            
+            # Stop if we've used up the budget or have enough chunks
+            if total_chars >= budget or len(context_parts) >= k:
                 break
         
-        context_parts.append(chunk)
-        total_chars += chunk_len + 2  # +2 for separator
+        return "\n\n".join(context_parts)
         
-        # Stop if we've used up the budget
-        if total_chars >= budget:
-            break
-    
-    return "\n\n".join(context_parts)
+    except Exception as e:
+        print(f"⚠ Error retrieving context: {e}")
+        return ""

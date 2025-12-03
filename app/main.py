@@ -17,22 +17,38 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from dotenv import load_dotenv
 
-from app import rag, groq, prompts, utils
+from app import rag, prompts, utils, memory
 from app.schemas import (
     PlanRequest, PlanResponse,
     ChatRequest, ChatResponse
 )
-from app.groq import GroqAPIError
+
+# LangChain imports
+from langchain_groq import ChatGroq
 
 
 # Load environment variables
 load_dotenv()
 
-# Global in-memory chat store: session_id -> list of message dicts
-chat_store: Dict[str, List[Dict[str, str]]] = {}
-
-# Maximum messages to keep per session
+# Maximum messages to keep per session (for memory manager)
 MAX_CHAT_HISTORY = 12
+
+# Initialize ChatGroq
+def get_chat_model() -> ChatGroq:
+    """Get or create ChatGroq instance."""
+    api_key = os.getenv("GROQ_API_KEY")
+    if not api_key:
+        raise ValueError("GROQ_API_KEY environment variable is required")
+    
+    model_name = os.getenv("GROQ_MODEL", "llama-3.1-8b-instant")
+    
+    return ChatGroq(
+        api_key=api_key,
+        model=model_name,
+        temperature=0.3,
+        max_tokens=None,
+        timeout=None
+    )
 
 
 @asynccontextmanager
@@ -49,8 +65,16 @@ async def lifespan(app: FastAPI):
     rag.ensure_kb_directory()
     kb_path = rag.get_kb_file_path()
     
-    # Create empty KB file if it doesn't exist
-    if not Path(kb_path).exists():
+    # Initialize vector store from KB file
+    if Path(kb_path).exists():
+        print(f"✓ Initializing vector store from: {kb_path}")
+        num_chunks = rag.initialize_kb()
+        if num_chunks > 0:
+            print(f"✓ Vector store initialized with {num_chunks} chunks")
+        else:
+            print(f"⚠ Failed to initialize vector store")
+    else:
+        # Create empty KB file
         Path(kb_path).write_text(
             "Early Intervention Knowledge Base\n\n"
             "This file will be used for RAG-based context retrieval.\n"
@@ -58,13 +82,7 @@ async def lifespan(app: FastAPI):
             encoding="utf-8"
         )
         print(f"✓ Created knowledge base file: {kb_path}")
-    else:
-        # Check if file has content
-        kb_content = rag.load_kb_text()
-        if kb_content.strip():
-            print(f"✓ Loaded knowledge base: {kb_path} ({len(kb_content)} chars)")
-        else:
-            print(f"⚠ Knowledge base exists but is empty: {kb_path}")
+        print(f"⚠ Vector store will be initialized on first use")
     
     # Print configuration
     port = os.getenv("PORT", "8080")
@@ -183,10 +201,17 @@ async def generate_plan(plan_req: PlanRequest):
     try:
         # Retrieve RAG context
         rag_budget = int(os.getenv("RAG_CONTEXT_BUDGET", "6000"))
+        
+        # Build query from all domains
+        domains_text = ", ".join(plan_req.domains)
+        extra_context = plan_req.extra_info or ""
+        if plan_req.notes:
+            extra_context = f"{plan_req.notes}. {extra_context}" if extra_context else plan_req.notes
+        
         context = rag.retrieve_context(
             age_months=plan_req.age_months,
-            domain=plan_req.domain,
-            extra_info=plan_req.extra_info,
+            domain=domains_text,
+            extra_info=extra_context,
             budget=rag_budget
         )
         
@@ -194,21 +219,32 @@ async def generate_plan(plan_req: PlanRequest):
         system_prompt = prompts.plan_system_prompt(context)
         
         # Build user message
-        user_message = f"Create an intervention plan for a {plan_req.age_months}-month-old child in the {plan_req.domain} domain."
+        areas_formatted = ", ".join([d.replace("_", " ").title() for d in plan_req.domains])
+        user_message = f"Create an intervention plan for a {plan_req.age_months}-month-old child with concerns in: {areas_formatted}."
+        if plan_req.notes:
+            user_message += f"\n\nNotes: {plan_req.notes}"
         if plan_req.extra_info:
             user_message += f"\n\nAdditional context: {plan_req.extra_info}"
         
-        # Call Groq with JSON mode
-        messages = [
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": user_message}
-        ]
+        # Call ChatGroq with JSON mode
+        from langchain_core.messages import SystemMessage, HumanMessage
         
-        response_text = await groq.chat(
-            messages=messages,
-            response_format={"type": "json_object"},
+        # Create LLM with temperature for this request
+        llm = ChatGroq(
+            api_key=os.getenv("GROQ_API_KEY"),
+            model=os.getenv("GROQ_MODEL", "llama-3.1-8b-instant"),
             temperature=0.2
         )
+        llm = llm.bind(response_format={"type": "json_object"})
+        
+        # Convert to LangChain format
+        lc_messages = [
+            SystemMessage(content=system_prompt),
+            HumanMessage(content=user_message)
+        ]
+        
+        response = llm.invoke(lc_messages)
+        response_text = response.content
         
         # Parse and repair JSON if needed
         response_json = utils.extract_or_repair_json(response_text)
@@ -221,11 +257,6 @@ async def generate_plan(plan_req: PlanRequest):
         plan_response = PlanResponse(**response_json)
         return plan_response
     
-    except GroqAPIError as e:
-        raise HTTPException(
-            status_code=500,
-            detail=f"Groq API error: {str(e)}"
-        )
     except Exception as e:
         raise HTTPException(
             status_code=500,
@@ -256,60 +287,63 @@ async def chat_endpoint(chat_req: ChatRequest):
         
         session_id = chat_req.session_id
         
-        # Initialize session if new
-        if session_id not in chat_store:
-            chat_store[session_id] = []
-        
-        # Retrieve RAG context if age/domain provided
+        # Retrieve RAG context if age/domains provided
         context = ""
-        if chat_req.age_months is not None and chat_req.domain is not None:
+        if chat_req.age_months is not None and chat_req.domains and len(chat_req.domains) > 0:
             rag_budget = int(os.getenv("RAG_CONTEXT_BUDGET", "6000"))
+            domains_text = ", ".join(chat_req.domains)
+            extra_context = chat_req.message
+            if chat_req.notes:
+                extra_context = f"{chat_req.notes}. {extra_context}"
+            
             context = rag.retrieve_context(
                 age_months=chat_req.age_months,
-                domain=chat_req.domain,
-                extra_info=chat_req.message,
+                domain=domains_text,
+                extra_info=extra_context,
                 budget=rag_budget
             )
         
-        # Build system prompt
-        system_prompt = prompts.chat_system_prompt(context)
+        # Build system prompt with age/domains context
+        domains_for_prompt = ", ".join(chat_req.domains) if chat_req.domains else None
+        system_prompt = prompts.chat_system_prompt(
+            context=context,
+            age_months=chat_req.age_months,
+            domain=domains_for_prompt,
+            notes=chat_req.notes
+        )
         
-        # Build messages list with history
-        messages = [
-            {"role": "system", "content": system_prompt}
-        ]
-        
-        # Add conversation history (last N messages)
-        history = chat_store[session_id][-MAX_CHAT_HISTORY:]
-        messages.extend(history)
+        # Get messages with history from memory manager
+        messages = memory.get_llm_context(session_id, system_prompt)
         
         # Add current user message
         messages.append({"role": "user", "content": chat_req.message})
         
-        # Call Groq
-        response_text = await groq.chat(
-            messages=messages,
-            temperature=0.3
-        )
+        # Call ChatGroq
+        llm = get_chat_model()
         
-        # Store messages in history
-        chat_store[session_id].append({"role": "user", "content": chat_req.message})
-        chat_store[session_id].append({"role": "assistant", "content": response_text})
+        from langchain_core.messages import SystemMessage, HumanMessage, AIMessage
         
-        # Trim history if too long
-        if len(chat_store[session_id]) > MAX_CHAT_HISTORY:
-            chat_store[session_id] = chat_store[session_id][-MAX_CHAT_HISTORY:]
+        # Convert to LangChain format
+        lc_messages = []
+        for msg in messages:
+            if msg["role"] == "system":
+                lc_messages.append(SystemMessage(content=msg["content"]))
+            elif msg["role"] == "user":
+                lc_messages.append(HumanMessage(content=msg["content"]))
+            elif msg["role"] == "assistant":
+                lc_messages.append(AIMessage(content=msg["content"]))
+        
+        response = llm.invoke(lc_messages)
+        response_text = response.content
+        
+        # Store in memory
+        memory.add_to_memory(session_id, chat_req.message, response_text)
         
         return ChatResponse(
             response=response_text,
             session_id=session_id
         )
     
-    except GroqAPIError as e:
-        raise HTTPException(
-            status_code=500,
-            detail=f"Groq API error: {str(e)}"
-        )
     except Exception as e:
         raise HTTPException(
             status_code=500,

@@ -3,7 +3,7 @@
  * Handles all communication with the FastAPI backend
  */
 
-const API_BASE_URL = 'http://134.154.74.230:8081';
+const API_BASE_URL = 'http://localhost:8081';
 
 /**
  * Upload knowledge base file (.txt or .md)
@@ -31,7 +31,8 @@ export async function uploadKB(file) {
  * Generate intervention plan
  * @param {Object} data - Plan request data
  * @param {number} data.age_months - Child's age in months (0-36)
- * @param {string} data.domain - Development domain
+ * @param {string[]} data.domains - Array of development domains
+ * @param {string} data.notes - Additional notes about the child (optional)
  * @param {string} data.extra_info - Additional context (optional)
  * @returns {Promise<Object>} Response with Goals, Strategies, and Advice for Parents
  */
@@ -58,7 +59,8 @@ export async function generatePlan(data) {
  * @param {string|null} sessionId - Session ID for conversation continuity (optional)
  * @param {Object} extras - Additional context (optional)
  * @param {number} extras.age_months - Child's age in months
- * @param {string} extras.domain - Development domain
+ * @param {string[]} extras.domains - Array of development domains
+ * @param {string} extras.notes - Notes about the child
  * @returns {Promise<Object>} Response with AI response and session_id
  */
 export async function sendChat(message, sessionId = null, extras = {}) {

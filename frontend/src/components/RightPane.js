@@ -19,7 +19,8 @@ import { PlayArrowOutlined, Menu, Brightness4, Brightness7, ArrowUpward } from '
 /**
  * RightPane Component
  * Main content area with:
- * - Age/Domain controls
+ * - Age/Domains controls
+ * - Notes field
  * - Generate button
  * - Plan sections (Goals, Strategies, Advice)
  * - Chat messages
@@ -28,7 +29,8 @@ import { PlayArrowOutlined, Menu, Brightness4, Brightness7, ArrowUpward } from '
 function RightPane({
   chatTitle,
   ageMonths,
-  domain,
+  domains,
+  notes,
   plan,
   messages,
   chatMessage,
@@ -39,7 +41,8 @@ function RightPane({
   onToggleSidebar,
   onToggleTheme,
   onAgeChange,
-  onDomainChange,
+  onDomainsChange,
+  onNotesChange,
   onGenerate,
   onChatMessageChange,
   onSendMessage,
@@ -173,13 +176,17 @@ function RightPane({
             </Select>
           </FormControl>
 
-          {/* Area of Concern Dropdown */}
-          <FormControl sx={{ minWidth: 200 }} size="small">
-            <InputLabel>Area of Concern</InputLabel>
+          {/* Areas of Concern - Multiple Select */}
+          <FormControl sx={{ minWidth: 300 }} size="small">
+            <InputLabel>Areas of Concern</InputLabel>
             <Select
-              value={domain || ''}
-              label="Area of Concern"
-              onChange={(e) => onDomainChange(e.target.value)}
+              multiple
+              value={domains || []}
+              label="Areas of Concern"
+              onChange={(e) => onDomainsChange(e.target.value)}
+              renderValue={(selected) => selected.map(d => 
+                d.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())
+              ).join(', ')}
               sx={{
                 borderRadius: 2,
                 '& .MuiOutlinedInput-notchedOutline': {
@@ -197,12 +204,37 @@ function RightPane({
           </FormControl>
         </Paper>
 
+          {/* Notes Field */}
+          <Paper
+          elevation={0}
+          sx={{
+            p: 2,
+            border: '1px solid',
+            borderColor: 'divider',
+          }}
+          >
+            <TextField
+              fullWidth
+              multiline
+              rows={3}
+              label="Notes"
+              placeholder="Add notes or observations about the child..."
+              value={notes || ''}
+              onChange={(e) => onNotesChange(e.target.value)}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: 2,
+                },
+              }}
+            />
+          </Paper>
+
           {/* Generate Button */}
           <Box sx={{ display: 'flex', justifyContent: 'center', mt: 1 }}>
             <Button
               variant="outlined"
               onClick={onGenerate}
-              disabled={!ageMonths || !domain || isGenerating}
+              disabled={!ageMonths || !domains || domains.length === 0 || isGenerating}
               sx={{
                 minWidth: 240,
                 py: 1.5,
