@@ -1,212 +1,89 @@
-# Early Intervention GenAI FastAPI Backend
+﻿# Early Intervention AI
 
-Backend-only FastAPI app for Early Intervention GenAI prototype. Uses Groq's OpenAI-compatible API with naive RAG over a single knowledge base file.
+##  Introduction
 
-## Quick Start
+Early Intervention AI is an intelligent assistant designed to support early intervention specialists, therapists, and families working with young children (0-36 months) who have developmental needs. The application leverages artificial intelligence and retrieval-augmented generation (RAG) to provide evidence-based, age-appropriate intervention plans and conversational support.
 
-```bash
-# Create and activate virtual environment
-python -m venv .venv
-.venv\Scripts\activate  # Windows
-# source .venv/bin/activate  # Linux/Mac
+##  Problem Statement
 
-# Install dependencies
+Early intervention professionals face several challenges:
+
+1. **Time-Intensive Planning**: Creating individualized intervention plans requires extensive research and documentation time
+2. **Knowledge Accessibility**: Practitioners need quick access to evidence-based strategies across multiple developmental domains
+3. **Customization Complexity**: Each child has unique needs spanning multiple areas of concern
+4. **Parent Engagement**: Families need practical, actionable advice that fits into daily routines
+5. **Documentation Burden**: Detailed note-taking takes time away from direct service delivery
+
+##  Our Solution
+
+- **AI-Powered Plan Generation**: Creates comprehensive intervention plans tailored to child's age and concerns
+- **Multiple Domain Support**: Handles complex cases across communication, social, motor, cognitive, and adaptive domains
+- **Knowledge Base Integration**: Uses RAG to ground recommendations in evidence-based resources
+- **Conversational Assistant**: Provides real-time guidance maintaining context about the child
+- **Notes Tracking**: Captures observations for continuity of care
+- **Family-Centered**: Generates practical advice for everyday activities
+
+##  Tech Stack
+
+**Frontend**: React 18, Material-UI v5, JavaScript ES6+, LocalStorage
+**Backend**: FastAPI, Python 3.8+, LangChain, ChatGroq (llama-3.1-8b-instant)
+**AI/ML**: ChromaDB, HuggingFace Embeddings, Sentence Transformers
+**Data**: Pydantic validation, Vector embeddings, RAG
+
+##  Installation
+
+**Backend:**
+```powershell
+cd "C:\Users\STSC\Desktop\Therapy AI\v1_code"
+.\.venv\Scripts\activate
 pip install -r requirements.txt
-
-# Setup environment
-cp .env.example .env
-# Edit .env and add your GROQ_API_KEY
-
-# Create knowledge base (optional - will be created automatically)
-mkdir kb
-echo "Paste your Early Intervention notes here." > kb/knowledge_base.txt
-
-# Run the server
-uvicorn app.main:app --reload --port 8080
+python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8081
 ```
 
-## API Endpoints
-
-### 1. Upload Knowledge Base
-Upload a `.txt` or `.md` file to use as the RAG knowledge base.
-
-```bash
-curl -X POST http://localhost:8080/api/rag/upload \
-  -F "file=@./my_ei_notes.txt"
+**Frontend:**
+```powershell
+cd frontend
+npm install
+npm start
 ```
 
-**Response:**
-```json
-{
-  "ok": true,
-  "kb_file": "C:\\path\\to\\kb\\knowledge_base.txt"
-}
-```
+Access at: http://localhost:3000
 
-### 2. Generate Intervention Plan
-Generate age-appropriate, domain-specific intervention plans.
+## 📖 Use Case Example
 
-```bash
-curl -X POST http://localhost:8080/api/plan \
-  -H "Content-Type: application/json" \
-  -d "{\"age_months\":24,\"domain\":\"communication\",\"extra_info\":\"struggles to follow one-step directions; bilingual home\"}"
-```
+**Scenario**: An early intervention specialist receives a referral for Emma, an 8-month-old infant showing delays in social interaction and motor skills.
 
-**Request Fields:**
-- `age_months` (int, required): Child's age in months (0-36)
-- `domain` (str, required): Development domain (e.g., `fine_motor`, `gross_motor`, `social`, `communication`, `cognitive`, `adaptive`)
-- `extra_info` (str, optional): Additional context
+**Step 1: Initial Assessment**
+- Specialist opens the application and enters Emma's information:
+  - Age: 8 months
+  - Domains of concern: Social, Fine Motor, Gross Motor
+  - Notes: "Unable to make sounds when playing; doesn't reach for toys; limited eye contact with parents"
 
-**Response:**
-```json
-{
-  "Goals": "Follow 1-step play-based directions (e.g., \"push car\") in 4/5 tries; sustain joint attention 8–10s; use 2-word combos during routines.",
-  "Strategies": "Short cues + gestures; model–pause–wait; embed practice in play; offer choices; repeat & expand child's words.",
-  "Advice for Parents": "Play daily in short bursts. Say one short direction, then wait. Celebrate attempts. Reuse the same words in snack/bath/cleanup."
-}
-```
+**Step 2: Plan Generation**
+- The AI generates a comprehensive intervention plan including:
+  - **Social Domain**: Activities to encourage eye contact through peek-a-boo games, interactive songs, and responsive play
+  - **Fine Motor**: Strategies for encouraging reaching and grasping using colorful toys, textured objects, and hand-over-hand support
+  - **Gross Motor**: Exercises for tummy time, supported sitting, and transitional movements
+  - Each activity includes age-appropriate adaptations and parent coaching tips
 
-### 3. Chat Interface
-Conversational interface with session memory.
+**Step 3: Conversational Support**
+- During the session, the specialist uses the chat feature:
+  - "What are some ways to encourage vocalization during play?"
+  - AI provides evidence-based strategies using the knowledge base
+  - Suggestions are contextualized for Emma's age and noted concerns
 
-```bash
-# Start new chat session
-curl -X POST http://localhost:8080/api/chat \
-  -H "Content-Type: application/json" \
-  -d "{\"message\":\"How do I reduce frustration during cleanup?\",\"age_months\":24,\"domain\":\"communication\"}"
+**Step 4: Progress Tracking**
+- The specialist adds session notes: "Emma maintained eye contact for 3 seconds during song time; showed interest in rattle but didn't grasp"
+- These notes are saved and can inform future plan generation
+- Family receives practical homework activities aligned with daily routines (bath time, feeding, play)
 
-# Continue existing session
-curl -X POST http://localhost:8080/api/chat \
-  -H "Content-Type: application/json" \
-  -d "{\"message\":\"What about mealtime?\",\"session_id\":\"<session_id_from_previous_response>\"}"
-```
+**Outcome**: The specialist saves 30+ minutes on plan development while delivering a comprehensive, evidence-based intervention strategy tailored specifically for Emma's needs.
 
-**Request Fields:**
-- `message` (str, required): User's message
-- `session_id` (str, optional): Session ID for conversation continuity (auto-generated if missing)
-- `age_months` (int, optional): Child's age for RAG context
-- `domain` (str, optional): Development domain for RAG context
+##  Future Enhancements
 
-**Response:**
-```json
-{
-  "response": "To reduce frustration during cleanup with a 24-month-old...",
-  "session_id": "550e8400-e29b-41d4-a716-446655440000"
-}
-```
-
-## Architecture
-
-### Tech Stack
-- **FastAPI** + **Uvicorn** - Modern async web framework
-- **Pydantic** - Request/response validation
-- **python-dotenv** - Environment configuration
-- **httpx** - Async HTTP client for Groq API
-- **python-multipart** - File upload support
-
-### Project Structure
-```
-ei-genai-fastapi/
-├─ app/
-│  ├─ main.py          # FastAPI app, routes, startup logic
-│  ├─ rag.py           # Chunking, scoring, retrieval helpers
-│  ├─ groq.py          # Async client for Groq chat completions
-│  ├─ schemas.py       # Pydantic request/response models
-│  ├─ prompts.py       # System prompts for plan + chat
-│  └─ utils.py         # JSON repair and helpers
-├─ kb/
-│  └─ knowledge_base.txt  # Single-file knowledge base
-├─ .env.example
-├─ requirements.txt
-└─ README.md
-```
-
-### RAG Implementation (Naive)
-1. **Single-file knowledge base** at `./kb/knowledge_base.txt`
-2. **Chunking**: Splits KB into ~1000 character slices
-3. **Scoring**: Simple token overlap between query and chunks
-4. **Retrieval**: Top chunks concatenated up to budget (default 6000 chars)
-5. **Context injection**: Passed as `[RAG CONTEXT]...[/RAG CONTEXT]` in system message
-
-### Groq API Integration
-- Uses OpenAI-compatible endpoint: `https://api.groq.com/openai/v1/chat/completions`
-- Supports JSON mode for structured plan generation
-- Configurable model via `GROQ_MODEL` env variable
-- Default: `llama3-70b-8192`
-
-### Chat Memory
-- **In-memory storage** per `session_id`
-- Keeps last **12 messages** per session
-- Auto-generates UUID for new sessions
-- No persistence (cleared on restart)
-
-## Configuration
-
-Edit `.env` file:
-
-```env
-GROQ_API_KEY=your_groq_key_here    # Required: Get from console.groq.com
-GROQ_MODEL=llama3-70b-8192         # Optional: Model to use
-PORT=8080                          # Optional: Server port
-KB_FILE=./kb/knowledge_base.txt    # Optional: KB file path
-RAG_CONTEXT_BUDGET=6000            # Optional: Max RAG context chars
-```
-
-## Features
-
-✅ Upload and replace knowledge base file  
-✅ Generate structured intervention plans with RAG  
-✅ JSON mode with fallback repair  
-✅ Conversational chat with session memory  
-✅ Age and domain-aware context retrieval  
-✅ CORS enabled for frontend integration  
-✅ Graceful handling of missing KB  
-✅ Input validation with detailed error messages  
-
-## Limitations & Future Extensions
-
-**Current Limitations:**
-- Single-file knowledge base only
-- Naive token overlap scoring (no embeddings)
-- In-memory chat history (no persistence)
-- No authentication/authorization
-- CORS open to all origins
-
-**Planned Extensions:**
-- PDF ingestion and parsing
-- Multi-file knowledge base support
-- Vector embeddings for semantic search
-- Redis for persistent chat sessions
-- PostgreSQL for knowledge base indexing
-- User authentication and rate limiting
-
-## Development
-
-```bash
-# Run with auto-reload
-uvicorn app.main:app --reload --port 8080
-
-# Run in production mode
-uvicorn app.main:app --host 0.0.0.0 --port 8080 --workers 4
-
-# Check logs
-# Server logs startup info: port, KB path, whether KB loaded
-```
-
-## Error Handling
-
-- **422 Unprocessable Entity**: Invalid request payload (Pydantic validation errors included)
-- **400 Bad Request**: Invalid file type, age out of range, etc.
-- **500 Internal Server Error**: Groq API failure (includes full error response)
-
-## Notes
-
-- KB file is created automatically on first startup if missing
-- Empty KB = empty RAG context (still functional)
-- Plan generation enforces strict JSON structure
-- Chat sessions are temporary (restart clears all history)
-- All endpoints accept both JSON and form-data
-
-## Support
-
-For issues or questions, refer to the inline code comments or check the Groq API documentation at https://console.groq.com/docs
+- Streaming responses
+- Progress tracking
+- PDF export
+- Multi-language support
+- Mobile app
+- Telehealth integration
