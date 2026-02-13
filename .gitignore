@@ -1,0 +1,11 @@
+﻿.env
+node_modules/
+__pycache__/
+*.pyc
+.venv/
+frontend/node_modules/
+frontend/build/
+chroma_db/
+mobile/node_modules/
+*.pdf
+*.exe

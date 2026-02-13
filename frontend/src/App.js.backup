@@ -1,0 +1,229 @@
+import React, { useState, useEffect, useMemo } from 'react';
+import { Box, ThemeProvider, CssBaseline, Snackbar, Alert, IconButton, AppBar, Toolbar, Typography } from '@mui/material';
+import { Brightness4, Brightness7 } from '@mui/icons-material';
+import { createAppTheme } from './theme';
+import Sidebar from './components/Sidebar';
+import RightPane from './components/RightPane';
+import { generatePlan, sendChat } from './api';
+
+// Generate a new UUID v4
+function generateUUID() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+    const r = (Math.random() * 16) | 0;
+    const v = c === 'x' ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+}
+
+// LocalStorage keys
+const STORAGE_KEY = 'ei_chats';
+const THEME_KEY = 'ei_theme_mode';
+const MAX_CHATS = 25;
+
+function App() {
+  // State Management
+  const [chats, setChats] = useState([]); // Changed from sessions to chats
+  const [activeChatId, setActiveChatId] = useState(null);
+  const [activeConversationId, setActiveConversationId] = useState(null);
+  const [chatMessage, setChatMessage] = useState('');
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [isSending, setIsSending] = useState(false);
+  const [themeMode, setThemeMode] = useState('dark');
+  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'info' });
+
+  // Create theme based on mode
+  const theme = useMemo(() => createAppTheme(themeMode), [themeMode]);
+
+  // Load sessions from localStorage on mount
+  useEffect(() => {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored);
+        setSessions(parsed);
+        // Set last session as active
+        if (parsed.length > 0) {
+          setActiveSessionId(parsed[0].id);
+        }
+      } catch (e) {
+        console.error('Failed to parse sessions:', e);
+      }
+    }
+    // Create initial session if none exist
+    if (!stored || stored === '[]') {
+      createNewSession();
+    }
+  }, []);
+
+  // Save sessions to localStorage whenever they change
+  useEffect(() => {
+    if (sessions.length > 0) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(sessions));
+    }
+  }, [sessions]);
+
+  // Get active session
+  const activeSession = sessions.find((s) => s.id === activeSessionId);
+
+  // Create new session
+  const createNewSession = () => {
+    const newSession = {
+      id: generateUUID(),
+      title: 'Untitled chat',
+      age_months: null,
+      domain: null,
+      plan: null,
+      messages: [],
+    };
+    setSessions((prev) => {
+      const updated = [newSession, ...prev];
+      // Keep only last MAX_SESSIONS
+      return updated.slice(0, MAX_SESSIONS);
+    });
+    setActiveSessionId(newSession.id);
+    setChatMessage('');
+  };
+
+  // Select session
+  const selectSession = (sessionId) => {
+    setActiveSessionId(sessionId);
+    setChatMessage('');
+  };
+
+  // Update active session
+  const updateSession = (updates) => {
+    setSessions((prev) =>
+      prev.map((s) => (s.id === activeSessionId ? { ...s, ...updates } : s))
+    );
+  };
+
+  // Generate plan handler
+  const handleGenerate = async () => {
+    if (!activeSession || !activeSession.age_months || !activeSession.domain) {
+      showSnackbar('Please select age and domain', 'warning');
+      return;
+    }
+
+    setIsGenerating(true);
+
+    try {
+      const result = await generatePlan({
+        age_months: activeSession.age_months,
+        domain: activeSession.domain,
+      });
+
+      // Update session with plan and title
+      const title = `${activeSession.age_months} month old – ${activeSession.domain
+        .replace('_', ' ')
+        .replace(/\b\w/g, (l) => l.toUpperCase())}`;
+
+      updateSession({
+        plan: result,
+        title: title,
+      });
+
+      showSnackbar('Plan generated successfully', 'success');
+    } catch (error) {
+      showSnackbar(error.message, 'error');
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  // Send chat message handler
+  const handleSendMessage = async () => {
+    if (!chatMessage.trim() || !activeSession) return;
+
+    const userMessage = chatMessage.trim();
+    setChatMessage('');
+
+    // Add user message immediately
+    const updatedMessages = [...activeSession.messages, { role: 'user', content: userMessage }];
+    updateSession({ messages: updatedMessages });
+
+    setIsSending(true);
+
+    try {
+      const result = await sendChat({
+        message: userMessage,
+        session_id: activeSession.id,
+        age_months: activeSession.age_months,
+        domain: activeSession.domain,
+      });
+
+      // Add AI response
+      updateSession({
+        messages: [...updatedMessages, { role: 'assistant', content: result.response }],
+      });
+
+      // Update session ID if backend returned one
+      if (result.session_id && result.session_id !== activeSession.id) {
+        updateSession({ id: result.session_id });
+        setActiveSessionId(result.session_id);
+      }
+    } catch (error) {
+      showSnackbar(error.message, 'error');
+      // Restore original messages on error
+      updateSession({ messages: activeSession.messages });
+      setChatMessage(userMessage);
+    } finally {
+      setIsSending(false);
+    }
+  };
+
+  const showSnackbar = (message, severity = 'info') => {
+    setSnackbar({ open: true, message, severity });
+  };
+
+  const handleCloseSnackbar = () => {
+    setSnackbar({ ...snackbar, open: false });
+  };
+
+  return (
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <Box sx={{ display: 'flex', height: '100vh', overflow: 'hidden', p: 2, gap: 2 }}>
+
+        {/* Left Sidebar */}
+        <Sidebar
+          sessions={sessions}
+          activeSessionId={activeSessionId}
+          onNewChat={createNewSession}
+          onSelectSession={selectSession}
+        />
+
+        {/* Right Pane */}
+        {activeSession && (
+          <RightPane
+            ageMonths={activeSession.age_months}
+            domain={activeSession.domain}
+            plan={activeSession.plan}
+            messages={activeSession.messages}
+            chatMessage={chatMessage}
+            isGenerating={isGenerating}
+            isSending={isSending}
+            onAgeChange={(value) => updateSession({ age_months: value !== '' ? parseInt(value) : null })}
+            onDomainChange={(value) => updateSession({ domain: value !== '' ? value : null })}
+            onGenerate={handleGenerate}
+            onChatMessageChange={setChatMessage}
+            onSendMessage={handleSendMessage}
+          />
+        )}
+
+        {/* Snackbar for notifications */}
+        <Snackbar
+          open={snackbar.open}
+          autoHideDuration={4000}
+          onClose={handleCloseSnackbar}
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        >
+          <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} sx={{ width: '100%' }}>
+            {snackbar.message}
+          </Alert>
+        </Snackbar>
+      </Box>
+    </ThemeProvider>
+  );
+}
+
+export default App;
