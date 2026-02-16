@@ -2,10 +2,6 @@ import React, { useRef, useEffect } from 'react';
 import {
   Box,
   Button,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
   Card,
   CardContent,
   Typography,
@@ -17,10 +13,8 @@ import {
   Grid,
   Checkbox,
   FormControlLabel,
-  FormGroup,
-  FormLabel,
 } from '@mui/material';
-import { PlayArrowOutlined, Menu, Brightness4, Brightness7, ArrowUpward } from '@mui/icons-material';
+import { Menu, Brightness4, Brightness7, ArrowUpward } from '@mui/icons-material';
 import VoiceControls from './VoiceControls';
 
 /**

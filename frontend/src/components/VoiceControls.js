@@ -23,7 +23,6 @@ function VoiceControls({
   const [speechSupported, setSpeechSupported] = useState(true);
   const [shouldListen, setShouldListen] = useState(false); // Track if user wants to keep listening
   const recognitionRef = useRef(null);
-  const synthesisRef = useRef(null);
   const sessionTranscriptRef = useRef(''); // Transcript for current recognition session
   const accumulatedTranscriptRef = useRef(''); // All accumulated transcript across sessions
 
