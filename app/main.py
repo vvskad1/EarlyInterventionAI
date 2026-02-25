@@ -17,12 +17,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from dotenv import load_dotenv
 
-from app import rag, prompts, utils, memory
+from app import rag, prompts, utils, memory, safety
 from app.schemas import (
     PlanRequest, PlanResponse,
     ChatRequest, ChatResponse
 )
-from app.validators import validate_intervention_plan
+# Use new simplified JSON validators
+from app.validators_new import validate_intervention_plan_json, verify_critical_requirements
 
 # LangChain imports
 from langchain_groq import ChatGroq
@@ -57,33 +58,25 @@ async def lifespan(app: FastAPI):
     """
     Lifespan event handler for startup and shutdown.
     """
-    # Startup: Ensure KB directory and file exist
+    # Startup
     print("=" * 60)
     print("Starting Early Intervention GenAI FastAPI Server")
     print("=" * 60)
     
-    # Create KB directory
-    rag.ensure_kb_directory()
-    kb_path = rag.get_kb_file_path()
+    # Check vector store collection
+    from app.vector_store import get_vector_store
+    vector_store = get_vector_store()
+    count = vector_store.get_collection_count()
     
-    # Initialize vector store from KB file
-    if Path(kb_path).exists():
-        print(f"✓ Initializing vector store from: {kb_path}")
-        num_chunks = rag.initialize_kb()
-        if num_chunks > 0:
-            print(f"✓ Vector store initialized with {num_chunks} chunks")
-        else:
-            print(f"⚠ Failed to initialize vector store")
+    if count > 0:
+        print(f"✓ Vector store loaded: {count} documents")
+        print(f"✓ Collection: early_intervention_complete")
     else:
-        # Create empty KB file
-        Path(kb_path).write_text(
-            "Early Intervention Knowledge Base\n\n"
-            "This file will be used for RAG-based context retrieval.\n"
-            "Upload your content via /api/rag/upload endpoint.\n",
-            encoding="utf-8"
-        )
-        print(f"✓ Created knowledge base file: {kb_path}")
-        print(f"⚠ Vector store will be initialized on first use")
+        print("⚠️ Vector store is empty!")
+        print("   Run 'python load_structured_data.py' to populate the collection")
+    
+    # Create KB directory (for legacy compatibility if needed)
+    rag.ensure_kb_directory()
     
     # Print configuration
     port = os.getenv("PORT", "8080")
@@ -202,8 +195,21 @@ async def generate_plan(plan_req: PlanRequest):
         )
     
     try:
-        # Retrieve RAG context
-        rag_budget = int(os.getenv("RAG_CONTEXT_BUDGET", "6000"))
+        # === SAFETY ANALYSIS LAYER ===
+        # Check for regression or urgent medical concerns before generating plan
+        safety_analysis = safety.analyze_safety_concerns(
+            observation=plan_req.notes or "",
+            notes=plan_req.extra_info or ""
+        )
+        
+        if safety_analysis["has_concerns"]:
+            print(f"\n⚠️ SAFETY CONCERN DETECTED:")
+            print(f"   Level: {safety_analysis['safety_level'].upper()}")
+            print(f"   Patterns matched: {safety_analysis['matched_patterns']}")
+            print(f"   Action: {safety_analysis['recommended_action']}")
+        
+        # Retrieve RAG context with section-specific sources
+        rag_budget = int(os.getenv("RAG_CONTEXT_BUDGET", "12000"))  # Increased for diverse sources and better citation coverage
         
         # Build query from all domains
         domains_text = ", ".join(plan_req.domains)
@@ -211,7 +217,9 @@ async def generate_plan(plan_req: PlanRequest):
         if plan_req.notes:
             extra_context = f"{plan_req.notes}. {extra_context}" if extra_context else plan_req.notes
         
-        context = rag.retrieve_context(
+        # Use enhanced retrieval for plan generation
+        # This gets: milestones (Goals) + FGRBI techniques (Strategies) + family advice (Advice)
+        context = rag.retrieve_for_plan_sections(
             age_months=plan_req.age_months,
             domain=domains_text,
             extra_info=extra_context,
@@ -232,19 +240,27 @@ async def generate_plan(plan_req: PlanRequest):
         llm = ChatGroq(
             api_key=os.getenv("GROQ_API_KEY"),
             model=os.getenv("GROQ_MODEL", "llama-3.1-8b-instant"),
-            temperature=0.2
+            temperature=0.2,
+            max_tokens=6000  # Increased to ensure full plan with Sources section
         )
-        llm = llm.bind(response_format={"type": "json_object"})
+        # Don't bind JSON format - let LLM generate freely and parse ourselves
+        # llm = llm.bind(response_format={"type": "json_object"})
         
         # Auto-retry with validation feedback
         max_attempts = 3
         best_response = None
-        best_validation_score = -1  # Track how many critical errors (fewer is better)
+        best_validation_score = float('inf')  # Track how many critical errors (fewer is better)
         validation_feedback = []
         
         for attempt in range(max_attempts):
             # Build system prompt (add validation feedback if retrying)
             system_prompt = prompts.plan_system_prompt(context)
+            
+            # === INJECT SAFETY WARNINGS ===
+            # If regression or urgent concerns detected, prepend safety instructions
+            safety_injection = safety.generate_safety_prompt_injection(safety_analysis)
+            if safety_injection:
+                system_prompt = safety_injection + "\n\n" + system_prompt
             
             if attempt > 0 and validation_feedback:
                 system_prompt += "\n\n" + "="*60 + "\n"
@@ -268,15 +284,63 @@ async def generate_plan(plan_req: PlanRequest):
             
             # Parse and repair JSON if needed
             response_json = utils.extract_or_repair_json(response_text)
+
+            if (
+                isinstance(response_json, dict)
+                and isinstance(response_json.get("goals"), list)
+                and len(response_json.get("goals", [])) == 0
+                and '"goals"' in response_text.lower()
+            ):
+                print("[DEBUG] ⚠ JSON parse fallback detected: raw response included goals but parsed payload is empty")
+
+            # Deterministic safety triage payload (cannot be omitted by LLM)
+            safety_alert_payload = safety.build_safety_alert_payload(safety_analysis)
+            if safety_alert_payload:
+                response_json["safety_alert"] = safety_alert_payload
+
+            # Deterministic safety guidance inside advice list (cannot be omitted by LLM)
+            response_json = safety.inject_safety_guidance_into_advice(response_json, safety_analysis)
             
-            # Ensure required keys exist
-            required_keys = ["Goals", "Strategies", "Advice for Parents"]
-            response_json = utils.ensure_json_keys(response_json, required_keys)
+            # DEBUG: Print raw response for troubleshooting
+            print(f"\n[DEBUG] Raw LLM response (first 500 chars):")
+            print(response_text[:500])
+            print(f"\n[DEBUG] Parsed JSON keys: {list(response_json.keys())}")
+
+            # Deterministically normalize sources to exact RAG labels
+            if context:
+                response_json = utils.normalize_sources_from_rag_context(response_json, context)
+
+            # Deterministically rewrite disallowed vocabulary-count goals
+            goals_before_sanitize = []
+            if isinstance(response_json.get("goals"), list):
+                goals_before_sanitize = [g.get("text", "") for g in response_json["goals"] if isinstance(g, dict)]
+
+            response_json = utils.sanitize_vocabulary_count_goals(response_json)
+
+            if isinstance(response_json.get("goals"), list):
+                goals_after_sanitize = [g.get("text", "") for g in response_json["goals"] if isinstance(g, dict)]
+                if goals_before_sanitize != goals_after_sanitize:
+                    print("[DEBUG] ✓ Sanitized count-based language goals into functional communication goals")
+
+            # Deterministically enrich emotional-regulation content for tantrum/transition cases
+            response_json = utils.enrich_emotional_regulation_content(
+                response_json,
+                notes_text=f"{plan_req.notes or ''} {plan_req.extra_info or ''}",
+                selected_domains=plan_req.domains,
+            )
             
-            # Validate plan quality
-            is_valid, validation_report = validate_intervention_plan(
+            # === INJECT SOURCE EXCERPTS ===
+            # Post-process to add actual source excerpts for transparency
+            if context:
+                response_json = utils.inject_excerpts_into_json(response_json, context)
+                print("[DEBUG] ✓ Injected source excerpts into JSON")
+            
+            # Validate plan quality (including source whitelist check)
+            is_valid, validation_report = validate_intervention_plan_json(
                 response_json, 
-                plan_req.age_months
+                plan_req.age_months,
+                rag_context=context,  # Pass RAG context for source validation
+                safety_analysis=safety_analysis
             )
             
             # Count critical errors (❌)
@@ -294,29 +358,95 @@ async def generate_plan(plan_req: PlanRequest):
             print(validation_report)
             print("="*60 + "\n")
             
-            # If valid (no critical errors), return immediately
-            if is_valid:
-                print(f"✅ Plan passed validation on attempt {attempt + 1}")
-                plan_response = PlanResponse(**response_json)
-                return plan_response
+            # CRITICAL: Verify minimum requirements before considering success
+            requirements_met, failed_requirements = verify_critical_requirements(
+                response_json,
+                rag_context=context,  # Pass RAG context for source validation
+                safety_analysis=safety_analysis
+            )
             
-            # Extract critical errors for feedback on next attempt
-            validation_feedback = []
-            for line in validation_report.split('\n'):
-                if line.strip().startswith('❌'):
-                    # Extract just the error description
-                    validation_feedback.append(line.strip())
+            if requirements_met:
+                print(f"✅ Plan passed critical requirements check on attempt {attempt + 1}")
+                # Also check general validation
+                if is_valid or critical_errors == 0:
+                    print(f"✅ Plan passed all validation checks")
+                    try:
+                        plan_response = PlanResponse(**response_json)
+                        return plan_response
+                    except Exception as schema_error:
+                        schema_msg = f"Schema validation failed: {schema_error}"
+                        print(f"❌ {schema_msg}")
+                        validation_feedback.append(schema_msg)
+                else:
+                    # Has critical requirements but quality issues - keep as best
+                    if best_response is None or critical_errors < best_validation_score:
+                        best_response = response_json
+                        best_validation_score = critical_errors
+            else:
+                print(f"❌ Plan failed critical requirements:")
+                for req in failed_requirements:
+                    print(f"  - {req}")
+                # Add failed requirements to feedback for next attempt
+                validation_feedback.extend(failed_requirements)
             
-            # If no critical errors but has warnings, accept it
-            if critical_errors == 0:
-                print(f"✅ Plan has warnings but no critical errors (attempt {attempt + 1})")
-                plan_response = PlanResponse(**response_json)
-                return plan_response
+            # If valid (no critical errors) AND requirements met, return immediately
+            if is_valid and requirements_met:
+                print(f"✅ Plan passed full validation on attempt {attempt + 1}")
+                try:
+                    plan_response = PlanResponse(**response_json)
+                    return plan_response
+                except Exception as schema_error:
+                    schema_msg = f"Schema validation failed: {schema_error}"
+                    print(f"❌ {schema_msg}")
+                    validation_feedback.append(schema_msg)
+            
+            # Extract critical errors for feedback on next attempt if not already added
+            if not validation_feedback or not any("goal" in f.lower() or "strateg" in f.lower() for f in validation_feedback):
+                for line in validation_report.split('\n'):
+                    if line.strip().startswith('❌'):
+                        validation_feedback.append(line.strip())
         
-        # If all attempts failed, return best attempt with warning
-        print(f"⚠️ All {max_attempts} attempts had validation issues. Returning best attempt.")
-        plan_response = PlanResponse(**best_response)
-        return plan_response
+        # FINAL VERIFICATION: Check if best attempt meets critical requirements
+        if best_response:
+            requirements_met, failed_requirements = verify_critical_requirements(
+                best_response,
+                rag_context=context,  # Pass RAG context for source validation
+                safety_analysis=safety_analysis
+            )
+            final_is_valid, final_validation_report = validate_intervention_plan_json(
+                best_response,
+                plan_req.age_months,
+                rag_context=context,
+                safety_analysis=safety_analysis
+            )
+
+            if requirements_met and final_is_valid:
+                print(f"⚠️ Returning best attempt (passed critical requirements but had quality warnings)")
+                try:
+                    plan_response = PlanResponse(**best_response)
+                    return plan_response
+                except Exception as schema_error:
+                    raise HTTPException(
+                        status_code=500,
+                        detail=f"Unable to generate schema-valid plan after {max_attempts} attempts: {schema_error}"
+                    )
+            else:
+                print(f"❌ CRITICAL: Best attempt not returnable")
+                if failed_requirements:
+                    print(f"   Requirements issues: {failed_requirements}")
+                if not final_is_valid:
+                    print(f"   Validation issues: {final_validation_report}")
+                # Don't return a response that fails critical requirements
+                raise HTTPException(
+                    status_code=500,
+                    detail=f"Unable to generate valid plan after {max_attempts} attempts. Failed requirements: {', '.join(failed_requirements) if failed_requirements else 'none'}. Validation: {final_validation_report}"
+                )
+        
+        # Should never reach here, but fallback
+        raise HTTPException(
+            status_code=500,
+            detail=f"Unable to generate valid plan after {max_attempts} attempts"
+        )
     
     except Exception as e:
         import traceback

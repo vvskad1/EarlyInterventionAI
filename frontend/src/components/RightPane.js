@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import {
   Box,
   Button,
@@ -13,9 +13,129 @@ import {
   Grid,
   Checkbox,
   FormControlLabel,
+  Chip,
 } from '@mui/material';
-import { Menu, Brightness4, Brightness7, ArrowUpward } from '@mui/icons-material';
+import { Menu, Brightness4, Brightness7, ArrowUpward, VerifiedUser } from '@mui/icons-material';
 import VoiceControls from './VoiceControls';
+import CitedText from './CitedText';
+import EvidenceDrawer from './EvidenceDrawer';
+import SectionEvidencePanel from './SectionEvidencePanel';
+import {
+  parseSources,
+  extractCitations,
+  calculateConfidence,
+  parseBulletPoints,
+} from '../utils/citationUtils';
+
+/**
+ * Parse Intervention_Plan markdown into sections
+ * Extracts Goals, Strategies, Advice, and Sources from markdown format
+ */
+function parseInterventionPlan(markdownContent) {
+  if (!markdownContent) return null;
+
+  // Extract sections using regex
+  const sections = {};
+
+  // Match ### 🎯 Goals ... (content until next ###)
+  const goalsMatch = markdownContent.match(/###\s*🎯\s*Goals\s*\n(.*?)(?=###|$)/s);
+  if (goalsMatch) sections.Goals = goalsMatch[1].trim();
+
+  // Match ### 🔧 Strategies
+  const strategiesMatch = markdownContent.match(/###\s*🔧\s*Strategies\s*\n(.*?)(?=###|$)/s);
+  if (strategiesMatch) sections.Strategies = strategiesMatch[1].trim();
+
+  // Match ### 💡 Advice for Parents
+  const adviceMatch = markdownContent.match(/###\s*💡\s*Advice for Parents\s*\n(.*?)(?=###|$)/s);
+  if (adviceMatch) sections['Advice for Parents'] = adviceMatch[1].trim();
+
+  // Match ### 📚 Sources
+  const sourcesMatch = markdownContent.match(/###\s*📚\s*Sources\s*\n(.*?)(?=###|$)/s);
+  if (sourcesMatch) sections.Sources = sourcesMatch[1].trim();
+
+  return sections;
+}
+
+/**
+ * Render chat message content with interactive citations
+ * Preserves formatting while making citations clickable
+ */
+function renderChatMessage(content, onCitationClick) {
+  if (!content) return null;
+
+  // Split by newlines to preserve structure
+  const lines = content.split('\n');
+  const elements = [];
+
+  lines.forEach((line, idx) => {
+    if (!line.trim()) {
+      // Empty line - add spacing
+      elements.push(<Box key={`space-${idx}`} sx={{ height: '0.5em' }} />);
+      return;
+    }
+
+    // Check for horizontal rule
+    if (line.trim() === '---') {
+      elements.push(
+        <Box
+          key={`hr-${idx}`}
+          sx={{
+            borderTop: '1px solid',
+            borderColor: 'divider',
+            opacity: 0.3,
+            my: 1.5,
+          }}
+        />
+      );
+      return;
+    }
+
+    // Check for numbered list item (1. 2. etc.)
+    const numberedMatch = line.match(/^(\d+)\.\s+(.+)$/);
+    if (numberedMatch) {
+      const number = numberedMatch[1];
+      const text = numberedMatch[2];
+      // Convert **text** to <strong>text</strong> for bold formatting
+      const formattedText = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+
+      elements.push(
+        <Box key={`num-${idx}`} sx={{ display: 'flex', gap: 1, mb: 1 }}>
+          <Typography variant="body2" sx={{ fontWeight: 600, minWidth: '24px' }}>
+            {number}.
+          </Typography>
+          <Typography variant="body2" sx={{ flex: 1, lineHeight: 1.6 }}>
+            <CitedText
+              text={formattedText}
+              onCitationClick={onCitationClick}
+              highlightMeasurable={false}
+            />
+          </Typography>
+        </Box>
+      );
+      return;
+    }
+
+    // Regular line - apply CitedText with bold formatting support
+    const formattedLine = line.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+
+    elements.push(
+      <Typography
+        key={`line-${idx}`}
+        variant="body2"
+        component="div"
+        sx={{ mb: 0.5, lineHeight: 1.6 }}
+      >
+        <CitedText
+          text={formattedLine}
+          onCitationClick={onCitationClick}
+          highlightMeasurable={false}
+        />
+      </Typography>
+    );
+  });
+
+  return elements;
+}
 
 /**
  * RightPane Component
@@ -55,6 +175,10 @@ function RightPane({
   const messagesEndRef = useRef(null);
   const planResultsRef = useRef(null);
 
+  // Evidence drawer state
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [selectedSource, setSelectedSource] = useState(null);
+
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -77,6 +201,80 @@ function RightPane({
   // Handle voice transcript from speech-to-text
   const handleTranscript = (transcript) => {
     onChatMessageChange(transcript);
+  };
+
+  const isStructuredPlan = Boolean(
+    plan &&
+    Array.isArray(plan.goals) &&
+    Array.isArray(plan.strategies) &&
+    Array.isArray(plan.advice) &&
+    Array.isArray(plan.sources)
+  );
+
+  // Backward compatibility: parse legacy markdown plan if present
+  const parsedPlan = !isStructuredPlan && plan?.Intervention_Plan
+    ? parseInterventionPlan(plan.Intervention_Plan)
+    : null;
+
+  // Normalize sources for evidence panel + drawer
+  const sources = isStructuredPlan
+    ? (plan.sources || []).map((source) => ({
+      id: source.id,
+      title: source.title,
+      authors: source.title,
+      year: '',
+      excerpt: source.excerpt || '',
+      link: '',
+    }))
+    : (parsedPlan?.Sources ? parseSources(parsedPlan.Sources) : []);
+
+  const goalCitationIds = isStructuredPlan
+    ? [...new Set((plan.goals || []).map((goal) => goal.source).filter(Boolean))]
+    : extractCitations(parsedPlan?.Goals || '');
+
+  const strategyCitationIds = isStructuredPlan
+    ? [...new Set((plan.strategies || []).map((strategy) => strategy.source).filter(Boolean))]
+    : extractCitations(parsedPlan?.Strategies || '');
+
+  const adviceCitationIds = isStructuredPlan
+    ? [...new Set((plan.advice || []).map((item) => item.source).filter(Boolean))]
+    : extractCitations(parsedPlan?.['Advice for Parents'] || parsedPlan?.Advice_for_Parents || '');
+
+  // Calculate confidence
+  const confidence = (isStructuredPlan || parsedPlan)
+    ? calculateConfidence({
+      goals: isStructuredPlan ? (plan.goals || []).map((goal) => `${goal.text} (Source ${goal.source})`).join('\n') : (parsedPlan?.Goals || ''),
+      strategies: isStructuredPlan ? (plan.strategies || []).map((strategy) => `${strategy.name} (Source ${strategy.source})`).join('\n') : (parsedPlan?.Strategies || ''),
+      advice: isStructuredPlan ? (plan.advice || []).map((item) => `${item.text} (Source ${item.source})`).join('\n') : (parsedPlan?.['Advice for Parents'] || ''),
+    }, sources)
+    : null;
+
+  const safetyAlert = plan?.safety_alert || null;
+
+  // Handle citation click
+  const handleCitationClick = (sourceId) => {
+    const source = sources.find(s => s.id === sourceId);
+    if (source) {
+      setSelectedSource(source);
+      setDrawerOpen(true);
+    } else {
+      // Fallback: Create placeholder source for citations without details
+      setSelectedSource({
+        id: sourceId,
+        title: `Source ${sourceId}`,
+        authors: 'From knowledge base',
+        year: '',
+        excerpt: 'This source was referenced from the retrieved RAG context. Full source details are available in the intervention plan Sources section.',
+        link: ''
+      });
+      setDrawerOpen(true);
+    }
+  };
+
+  // Handle source click from evidence panel
+  const handleSourceClick = (source) => {
+    setSelectedSource(source);
+    setDrawerOpen(true);
   };
 
   return (
@@ -510,19 +708,56 @@ function RightPane({
             </Box>
 
             {/* Plan Results Display */}
-            {plan && (
+            {(isStructuredPlan || parsedPlan) && (
               <Box ref={planResultsRef} sx={{ mt: 3 }}>
-                <Typography
-                  variant="h6"
-                  sx={{
-                    fontWeight: 700,
-                    mb: 2.5,
-                    fontSize: '1.1rem',
-                    color: 'text.primary',
-                  }}
-                >
-                  Intervention Plan
-                </Typography>
+                {safetyAlert && safetyAlert.level !== 'routine' && (
+                  <Card
+                    variant="outlined"
+                    sx={{
+                      mb: 2,
+                      borderRadius: 2,
+                      borderColor: safetyAlert.level === 'urgent' ? 'error.main' : 'warning.main',
+                      borderWidth: 2,
+                      bgcolor: safetyAlert.level === 'urgent' ? 'error.lighter' : 'warning.lighter',
+                    }}
+                  >
+                    <CardContent sx={{ p: 2.5 }}>
+                      <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 1 }}>
+                        {safetyAlert.level === 'urgent' ? '🚨 Urgent Medical Concern' : '⚠️ Regression Concern'}
+                      </Typography>
+                      <Typography variant="body2" sx={{ mb: 1 }}>
+                        {safetyAlert.message}
+                      </Typography>
+                      <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                        Recommended action: {safetyAlert.recommended_action}
+                      </Typography>
+                    </CardContent>
+                  </Card>
+                )}
+
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2.5 }}>
+                  <Typography
+                    variant="h6"
+                    sx={{
+                      fontWeight: 700,
+                      fontSize: '1.1rem',
+                      color: 'text.primary',
+                    }}
+                  >
+                    Intervention Plan
+                  </Typography>
+
+                  {/* Confidence Badge */}
+                  {confidence && (
+                    <Chip
+                      icon={<VerifiedUser />}
+                      label={confidence.label}
+                      color={confidence.color}
+                      size="small"
+                      sx={{ fontWeight: 600 }}
+                    />
+                  )}
+                </Box>
 
                 {/* Goals Section */}
                 <Card
@@ -542,22 +777,38 @@ function RightPane({
                         fontWeight: 700,
                         textTransform: 'uppercase',
                         letterSpacing: '1px',
-                        fontSize: '0.75rem',
+                        fontSize: '1rem',
                         mb: 1.5,
                         color: 'primary.main',
                       }}
                     >
                       🎯 Goals
                     </Typography>
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        lineHeight: 1.7,
-                        whiteSpace: 'pre-wrap',
-                      }}
-                    >
-                      {plan.Goals}
-                    </Typography>
+                    <Box component="ul" sx={{ pl: 3, m: 0, listStyleType: 'disc' }}>
+                      {(isStructuredPlan
+                        ? (plan.goals || []).map((goal) => `${goal.text} (Source ${goal.source})`)
+                        : parseBulletPoints(parsedPlan?.Goals || '')
+                      ).map((bullet, idx) => (
+                        <Typography
+                          key={idx}
+                          component="li"
+                          variant="body2"
+                          sx={{ lineHeight: 1.7, mb: 1.5, display: 'list-item' }}
+                        >
+                          <CitedText
+                            text={bullet}
+                            onCitationClick={handleCitationClick}
+                            highlightMeasurable={true}
+                          />
+                        </Typography>
+                      ))}
+                    </Box>
+
+                    <SectionEvidencePanel
+                      citationIds={goalCitationIds}
+                      sources={sources}
+                      onSourceClick={handleSourceClick}
+                    />
                   </CardContent>
                 </Card>
 
@@ -579,22 +830,74 @@ function RightPane({
                         fontWeight: 700,
                         textTransform: 'uppercase',
                         letterSpacing: '1px',
-                        fontSize: '0.75rem',
+                        fontSize: '1rem',
                         mb: 1.5,
                         color: 'primary.main',
                       }}
                     >
                       🔧 Strategies
                     </Typography>
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        lineHeight: 1.7,
-                        whiteSpace: 'pre-wrap',
-                      }}
-                    >
-                      {plan.Strategies}
-                    </Typography>
+                    {isStructuredPlan ? (
+                      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                        {(plan.strategies || []).map((strategy, idx) => (
+                          <Box key={idx} sx={{ p: 1.5, border: '1px solid', borderColor: 'divider', borderRadius: 1.5 }}>
+                            <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1 }}>
+                              {`Strategy ${idx + 1}: ${strategy.name}`}
+                            </Typography>
+                            <Box component="ul" sx={{ pl: 2.5, m: 0, mb: 1 }}>
+                              {(strategy.description || []).map((item, itemIdx) => (
+                                <Typography key={itemIdx} component="li" variant="body2" sx={{ lineHeight: 1.6, mb: 0.6 }}>
+                                  {item}
+                                </Typography>
+                              ))}
+                            </Box>
+                            <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
+                              Examples:
+                            </Typography>
+                            <Box component="ul" sx={{ pl: 2.5, m: 0, mb: 1 }}>
+                              {(strategy.examples || []).map((example, exampleIdx) => (
+                                <Typography key={exampleIdx} component="li" variant="body2" sx={{ lineHeight: 1.6, mb: 0.4 }}>
+                                  {example}
+                                </Typography>
+                              ))}
+                            </Box>
+                            <Typography variant="body2" sx={{ mb: 0.5 }}>
+                              <strong>Routine:</strong> {strategy.routine}
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary">
+                              <CitedText
+                                text={`(Source ${strategy.source})`}
+                                onCitationClick={handleCitationClick}
+                                highlightMeasurable={false}
+                              />
+                            </Typography>
+                          </Box>
+                        ))}
+                      </Box>
+                    ) : (
+                      <Box component="ul" sx={{ pl: 3, m: 0, listStyleType: 'disc' }}>
+                        {parseBulletPoints(parsedPlan?.Strategies || '').map((bullet, idx) => (
+                          <Typography
+                            key={idx}
+                            component="li"
+                            variant="body2"
+                            sx={{ lineHeight: 1.7, mb: 1.5, display: 'list-item' }}
+                          >
+                            <CitedText
+                              text={bullet}
+                              onCitationClick={handleCitationClick}
+                              highlightMeasurable={true}
+                            />
+                          </Typography>
+                        ))}
+                      </Box>
+                    )}
+
+                    <SectionEvidencePanel
+                      citationIds={strategyCitationIds}
+                      sources={sources}
+                      onSourceClick={handleSourceClick}
+                    />
                   </CardContent>
                 </Card>
 
@@ -616,24 +919,98 @@ function RightPane({
                         fontWeight: 700,
                         textTransform: 'uppercase',
                         letterSpacing: '1px',
-                        fontSize: '0.75rem',
+                        fontSize: '1rem',
                         mb: 1.5,
                         color: 'primary.main',
                       }}
                     >
                       💡 Advice for Parents
                     </Typography>
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        lineHeight: 1.7,
-                        whiteSpace: 'pre-wrap',
-                      }}
-                    >
-                      {plan['Advice for Parents'] || plan.Advice_for_Parents}
-                    </Typography>
+                    <Box component="ul" sx={{ pl: 3, m: 0, listStyleType: 'disc' }}>
+                      {(isStructuredPlan
+                        ? (plan.advice || []).map((item) => `${item.text} (Source ${item.source})`)
+                        : parseBulletPoints(parsedPlan?.['Advice for Parents'] || parsedPlan?.Advice_for_Parents || '')
+                      ).map((bullet, idx) => (
+                        <Typography
+                          key={idx}
+                          component="li"
+                          variant="body2"
+                          sx={{ lineHeight: 1.7, mb: 1.5, display: 'list-item' }}
+                        >
+                          <CitedText
+                            text={bullet}
+                            onCitationClick={handleCitationClick}
+                            highlightMeasurable={true}
+                          />
+                        </Typography>
+                      ))}
+                    </Box>
+
+                    <SectionEvidencePanel
+                      citationIds={adviceCitationIds}
+                      sources={sources}
+                      onSourceClick={handleSourceClick}
+                    />
                   </CardContent>
                 </Card>
+
+                {/* Sources Section (if present) */}
+                {(isStructuredPlan ? sources.length > 0 : parsedPlan?.Sources) && (
+                  <Card
+                    variant="outlined"
+                    sx={{
+                      mb: 2,
+                      borderRadius: 2,
+                      borderColor: 'divider',
+                      borderWidth: 1.5,
+                      boxShadow: '0 2px 4px rgba(0,0,0,0.08)',
+                    }}
+                  >
+                    <CardContent sx={{ p: 2.5 }}>
+                      <Typography
+                        variant="subtitle2"
+                        sx={{
+                          fontWeight: 700,
+                          textTransform: 'uppercase',
+                          letterSpacing: '1px',
+                          fontSize: '1rem',
+                          mb: 1.5,
+                          color: 'primary.main',
+                        }}
+                      >
+                        📚 Sources
+                      </Typography>
+                      {isStructuredPlan ? (
+                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.25 }}>
+                          {sources.map((source) => (
+                            <Box key={source.id}>
+                              <Typography variant="body2" sx={{ fontWeight: 600, color: 'text.primary' }}>
+                                {`- Source ${source.id}: ${source.title}`}
+                              </Typography>
+                              {source.excerpt && (
+                                <Typography variant="body2" sx={{ pl: 2, color: 'text.secondary', fontStyle: 'italic' }}>
+                                  {`"${source.excerpt}"`}
+                                </Typography>
+                              )}
+                            </Box>
+                          ))}
+                        </Box>
+                      ) : (
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            lineHeight: 1.7,
+                            whiteSpace: 'pre-wrap',
+                            fontSize: '0.85rem',
+                            color: 'text.secondary',
+                          }}
+                        >
+                          {parsedPlan.Sources}
+                        </Typography>
+                      )}
+                    </CardContent>
+                  </Card>
+                )}
               </Box>
             )}
 
@@ -646,6 +1023,7 @@ function RightPane({
                     sx={{
                       display: 'flex',
                       justifyContent: msg.role === 'user' ? 'flex-end' : 'flex-start',
+                      width: '100%',
                     }}
                   >
                     <Paper
@@ -665,20 +1043,22 @@ function RightPane({
                         boxShadow: msg.role === 'user' ? '0 1px 2px rgba(0,0,0,0.05)' : '0 1px 3px rgba(0,0,0,0.08)',
                       }}
                     >
-                      <Typography
-                        variant="body2"
-                        sx={{
-                          whiteSpace: 'pre-wrap',
-                          lineHeight: 1.6,
-                          '& strong': { fontWeight: 700 },
-                        }}
-                        dangerouslySetInnerHTML={{
-                          __html: msg.content
-                            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                            .replace(/---/g, '<hr style="border: none; border-top: 1px solid rgba(255,255,255,0.1); margin: 12px 0;" />')
-                            .replace(/\n/g, '<br />'),
-                        }}
-                      />
+                      {msg.role === 'user' ? (
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            whiteSpace: 'pre-wrap',
+                            lineHeight: 1.6,
+                            wordBreak: 'break-word',
+                          }}
+                        >
+                          {msg.content}
+                        </Typography>
+                      ) : (
+                        <Box>
+                          {renderChatMessage(msg.content, handleCitationClick)}
+                        </Box>
+                      )}
                     </Paper>
                   </Box>
                 ))}
@@ -764,6 +1144,13 @@ function RightPane({
             )}
           </IconButton>
         </Paper>
+
+        {/* Evidence Drawer for Source Details */}
+        <EvidenceDrawer
+          open={drawerOpen}
+          onClose={() => setDrawerOpen(false)}
+          source={selectedSource}
+        />
       </Box>
     </Box>
   );

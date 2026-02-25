@@ -12,9 +12,14 @@ from pathlib import Path
 from typing import List, Dict, Optional
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import Chroma
-from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.document_loaders import TextLoader, PDFPlumberLoader
 from langchain_core.documents import Document
+
+# Try new import first, fallback to old for compatibility
+try:
+    from langchain_huggingface import HuggingFaceEmbeddings
+except ImportError:
+    from langchain_community.embeddings import HuggingFaceEmbeddings
 
 
 class VectorStoreManager:
@@ -25,6 +30,7 @@ class VectorStoreManager:
     def __init__(
         self,
         persist_directory: str = "./chroma_db",
+        collection_name: str = "early_intervention_complete",
         embedding_model: str = "all-MiniLM-L6-v2",
         chunk_size: int = 1000,
         chunk_overlap: int = 200
@@ -34,11 +40,13 @@ class VectorStoreManager:
         
         Args:
             persist_directory: Directory to persist ChromaDB data
+            collection_name: Name of ChromaDB collection to use
             embedding_model: HuggingFace model for embeddings
             chunk_size: Size of text chunks for splitting
             chunk_overlap: Overlap between chunks
         """
         self.persist_directory = persist_directory
+        self.collection_name = collection_name
         self.chunk_size = chunk_size
         self.chunk_overlap = chunk_overlap
         
@@ -67,15 +75,19 @@ class VectorStoreManager:
             if Path(self.persist_directory).exists():
                 self.vector_store = Chroma(
                     persist_directory=self.persist_directory,
-                    embedding_function=self.embeddings
+                    embedding_function=self.embeddings,
+                    collection_name=self.collection_name
                 )
                 print(f"✓ Loaded existing vector store from {self.persist_directory}")
+                print(f"  Collection: {self.collection_name}")
             else:
                 self.vector_store = Chroma(
                     persist_directory=self.persist_directory,
-                    embedding_function=self.embeddings
+                    embedding_function=self.embeddings,
+                    collection_name=self.collection_name
                 )
                 print(f"✓ Created new vector store at {self.persist_directory}")
+                print(f"  Collection: {self.collection_name}")
         except Exception as e:
             print(f"⚠ Error loading/creating vector store: {e}")
             self.vector_store = None

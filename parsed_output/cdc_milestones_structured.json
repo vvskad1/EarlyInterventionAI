@@ -1,0 +1,1145 @@
+[
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Social Interaction",
+    "age_checkpoint": 2,
+    "age_min": 1,
+    "age_max": 4,
+    "milestone_text": "Calms down when spoken to or picked up",
+    "original_domain": "Social/Emotional"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Social Interaction",
+    "age_checkpoint": 2,
+    "age_min": 1,
+    "age_max": 4,
+    "milestone_text": "Looks at your face",
+    "original_domain": "Social/Emotional"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Social Interaction",
+    "age_checkpoint": 2,
+    "age_min": 1,
+    "age_max": 4,
+    "milestone_text": "Seems happy to see you when you walk up to them",
+    "original_domain": "Social/Emotional"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Social Interaction",
+    "age_checkpoint": 2,
+    "age_min": 1,
+    "age_max": 4,
+    "milestone_text": "Smiles when you talk to or smile at them",
+    "original_domain": "Social/Emotional"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Language",
+    "age_checkpoint": 2,
+    "age_min": 1,
+    "age_max": 4,
+    "milestone_text": "Makes sounds other than crying",
+    "original_domain": "Language/Communication"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Language",
+    "age_checkpoint": 2,
+    "age_min": 1,
+    "age_max": 4,
+    "milestone_text": "Reacts to loud sounds",
+    "original_domain": "Language/Communication"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Self-Directed Learning",
+    "age_checkpoint": 2,
+    "age_min": 1,
+    "age_max": 4,
+    "milestone_text": "Watches you as you move",
+    "original_domain": "Cognitive"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Self-Directed Learning",
+    "age_checkpoint": 2,
+    "age_min": 1,
+    "age_max": 4,
+    "milestone_text": "Looks at a toy for several seconds",
+    "original_domain": "Cognitive"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Gross Motor",
+    "age_checkpoint": 2,
+    "age_min": 1,
+    "age_max": 4,
+    "milestone_text": "Holds head up when on tummy",
+    "original_domain": "Movement/Physical"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Gross Motor",
+    "age_checkpoint": 2,
+    "age_min": 1,
+    "age_max": 4,
+    "milestone_text": "Moves both arms and both legs",
+    "original_domain": "Movement/Physical"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Gross Motor",
+    "age_checkpoint": 2,
+    "age_min": 1,
+    "age_max": 4,
+    "milestone_text": "Briefly opens fingers when hands are relaxing",
+    "original_domain": "Movement/Physical"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Social Interaction",
+    "age_checkpoint": 4,
+    "age_min": 3,
+    "age_max": 6,
+    "milestone_text": "Smiles on their own to get your attention",
+    "original_domain": "Social/Emotional"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Social Interaction",
+    "age_checkpoint": 4,
+    "age_min": 3,
+    "age_max": 6,
+    "milestone_text": "Chuckles (not yet a full laugh) when you try to make them laugh",
+    "original_domain": "Social/Emotional"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Social Interaction",
+    "age_checkpoint": 4,
+    "age_min": 3,
+    "age_max": 6,
+    "milestone_text": "Looks at you, moves, or makes sounds to get or keep your attention",
+    "original_domain": "Social/Emotional"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Language",
+    "age_checkpoint": 4,
+    "age_min": 3,
+    "age_max": 6,
+    "milestone_text": "Makes sounds like 'oooo', 'aahh' (cooing)",
+    "original_domain": "Language/Communication"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Language",
+    "age_checkpoint": 4,
+    "age_min": 3,
+    "age_max": 6,
+    "milestone_text": "Makes sounds back when you talk to them",
+    "original_domain": "Language/Communication"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Language",
+    "age_checkpoint": 4,
+    "age_min": 3,
+    "age_max": 6,
+    "milestone_text": "Turns head towards the sound of your voice",
+    "original_domain": "Language/Communication"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Self-Directed Learning",
+    "age_checkpoint": 4,
+    "age_min": 3,
+    "age_max": 6,
+    "milestone_text": "If hungry, opens mouth when they see breast or bottle",
+    "original_domain": "Cognitive"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Self-Directed Learning",
+    "age_checkpoint": 4,
+    "age_min": 3,
+    "age_max": 6,
+    "milestone_text": "Looks at their hands with interest",
+    "original_domain": "Cognitive"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Gross Motor",
+    "age_checkpoint": 4,
+    "age_min": 3,
+    "age_max": 6,
+    "milestone_text": "Holds head steady without support when being held",
+    "original_domain": "Movement/Physical"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Gross Motor",
+    "age_checkpoint": 4,
+    "age_min": 3,
+    "age_max": 6,
+    "milestone_text": "Holds a toy when you put it in their hand",
+    "original_domain": "Movement/Physical"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Gross Motor",
+    "age_checkpoint": 4,
+    "age_min": 3,
+    "age_max": 6,
+    "milestone_text": "Uses their arm to swing at toys",
+    "original_domain": "Movement/Physical"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Gross Motor",
+    "age_checkpoint": 4,
+    "age_min": 3,
+    "age_max": 6,
+    "milestone_text": "Brings hands to mouth",
+    "original_domain": "Movement/Physical"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Gross Motor",
+    "age_checkpoint": 4,
+    "age_min": 3,
+    "age_max": 6,
+    "milestone_text": "Pushes up onto elbows/forearms when on tummy",
+    "original_domain": "Movement/Physical"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Social Interaction",
+    "age_checkpoint": 6,
+    "age_min": 5,
+    "age_max": 8,
+    "milestone_text": "Knows familiar people",
+    "original_domain": "Social/Emotional"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Social Interaction",
+    "age_checkpoint": 6,
+    "age_min": 5,
+    "age_max": 8,
+    "milestone_text": "Likes to look at self in a mirror",
+    "original_domain": "Social/Emotional"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Social Interaction",
+    "age_checkpoint": 6,
+    "age_min": 5,
+    "age_max": 8,
+    "milestone_text": "Laughs",
+    "original_domain": "Social/Emotional"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Language",
+    "age_checkpoint": 6,
+    "age_min": 5,
+    "age_max": 8,
+    "milestone_text": "Takes turns making sounds with you",
+    "original_domain": "Language/Communication"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Language",
+    "age_checkpoint": 6,
+    "age_min": 5,
+    "age_max": 8,
+    "milestone_text": "Blows 'raspberries' (sticks tongue out and blows)",
+    "original_domain": "Language/Communication"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Language",
+    "age_checkpoint": 6,
+    "age_min": 5,
+    "age_max": 8,
+    "milestone_text": "Makes squealing noises",
+    "original_domain": "Language/Communication"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Self-Directed Learning",
+    "age_checkpoint": 6,
+    "age_min": 5,
+    "age_max": 8,
+    "milestone_text": "Puts things in their mouth to explore them",
+    "original_domain": "Cognitive"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Self-Directed Learning",
+    "age_checkpoint": 6,
+    "age_min": 5,
+    "age_max": 8,
+    "milestone_text": "Reaches to grab a toy they want",
+    "original_domain": "Cognitive"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Self-Directed Learning",
+    "age_checkpoint": 6,
+    "age_min": 5,
+    "age_max": 8,
+    "milestone_text": "Closes lips to show they don't want more food",
+    "original_domain": "Cognitive"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Gross Motor",
+    "age_checkpoint": 6,
+    "age_min": 5,
+    "age_max": 8,
+    "milestone_text": "Rolls from tummy to back",
+    "original_domain": "Movement/Physical"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Gross Motor",
+    "age_checkpoint": 6,
+    "age_min": 5,
+    "age_max": 8,
+    "milestone_text": "Pushes up with straight arms when on tummy",
+    "original_domain": "Movement/Physical"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Gross Motor",
+    "age_checkpoint": 6,
+    "age_min": 5,
+    "age_max": 8,
+    "milestone_text": "Leans on hands to support self when sitting",
+    "original_domain": "Movement/Physical"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Social Interaction",
+    "age_checkpoint": 9,
+    "age_min": 8,
+    "age_max": 11,
+    "milestone_text": "Is shy, clingy, or fearful around strangers",
+    "original_domain": "Social/Emotional"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Social Interaction",
+    "age_checkpoint": 9,
+    "age_min": 8,
+    "age_max": 11,
+    "milestone_text": "Shows several facial expressions, like happy, sad, angry, and surprised",
+    "original_domain": "Social/Emotional"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Social Interaction",
+    "age_checkpoint": 9,
+    "age_min": 8,
+    "age_max": 11,
+    "milestone_text": "Looks when you call their name",
+    "original_domain": "Social/Emotional"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Social Interaction",
+    "age_checkpoint": 9,
+    "age_min": 8,
+    "age_max": 11,
+    "milestone_text": "Reacts when you leave (looks, reaches for you, or cries)",
+    "original_domain": "Social/Emotional"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Social Interaction",
+    "age_checkpoint": 9,
+    "age_min": 8,
+    "age_max": 11,
+    "milestone_text": "Smiles or laughs when you play peek-a-boo",
+    "original_domain": "Social/Emotional"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Language",
+    "age_checkpoint": 9,
+    "age_min": 8,
+    "age_max": 11,
+    "milestone_text": "Makes a lot of different sounds like 'mamamama' and 'babababa'",
+    "original_domain": "Language/Communication"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Language",
+    "age_checkpoint": 9,
+    "age_min": 8,
+    "age_max": 11,
+    "milestone_text": "Lifts arms up to be picked up",
+    "original_domain": "Language/Communication"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Self-Directed Learning",
+    "age_checkpoint": 9,
+    "age_min": 8,
+    "age_max": 11,
+    "milestone_text": "Looks for objects when dropped out of sight (like their spoon or toy)",
+    "original_domain": "Cognitive"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Self-Directed Learning",
+    "age_checkpoint": 9,
+    "age_min": 8,
+    "age_max": 11,
+    "milestone_text": "Bangs two things together",
+    "original_domain": "Cognitive"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Gross Motor",
+    "age_checkpoint": 9,
+    "age_min": 8,
+    "age_max": 11,
+    "milestone_text": "Gets to a sitting position by themselves",
+    "original_domain": "Movement/Physical"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Gross Motor",
+    "age_checkpoint": 9,
+    "age_min": 8,
+    "age_max": 11,
+    "milestone_text": "Moves things from one hand to the other hand",
+    "original_domain": "Movement/Physical"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Gross Motor",
+    "age_checkpoint": 9,
+    "age_min": 8,
+    "age_max": 11,
+    "milestone_text": "Uses fingers to 'rake' food towards themselves",
+    "original_domain": "Movement/Physical"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Gross Motor",
+    "age_checkpoint": 9,
+    "age_min": 8,
+    "age_max": 11,
+    "milestone_text": "Sits without support",
+    "original_domain": "Movement/Physical"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Social Interaction",
+    "age_checkpoint": 12,
+    "age_min": 11,
+    "age_max": 14,
+    "milestone_text": "Plays games with you, like pat-a-cake",
+    "original_domain": "Social/Emotional"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Language",
+    "age_checkpoint": 12,
+    "age_min": 11,
+    "age_max": 14,
+    "milestone_text": "Waves 'bye-bye'",
+    "original_domain": "Language/Communication"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Language",
+    "age_checkpoint": 12,
+    "age_min": 11,
+    "age_max": 14,
+    "milestone_text": "Calls a parent 'mama' or 'dada' or another special name",
+    "original_domain": "Language/Communication"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Language",
+    "age_checkpoint": 12,
+    "age_min": 11,
+    "age_max": 14,
+    "milestone_text": "Understands 'no' (pauses briefly or stops when you say it)",
+    "original_domain": "Language/Communication"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Self-Directed Learning",
+    "age_checkpoint": 12,
+    "age_min": 11,
+    "age_max": 14,
+    "milestone_text": "Puts something in a container, like a block in a cup",
+    "original_domain": "Cognitive"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Self-Directed Learning",
+    "age_checkpoint": 12,
+    "age_min": 11,
+    "age_max": 14,
+    "milestone_text": "Looks for things they see you hide, like a toy under a blanket",
+    "original_domain": "Cognitive"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Gross Motor",
+    "age_checkpoint": 12,
+    "age_min": 11,
+    "age_max": 14,
+    "milestone_text": "Pulls up to stand",
+    "original_domain": "Movement/Physical"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Gross Motor",
+    "age_checkpoint": 12,
+    "age_min": 11,
+    "age_max": 14,
+    "milestone_text": "Walks, holding on to furniture ('cruising')",
+    "original_domain": "Movement/Physical"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Gross Motor",
+    "age_checkpoint": 12,
+    "age_min": 11,
+    "age_max": 14,
+    "milestone_text": "Drinks from a cup without a lid, as you hold it",
+    "original_domain": "Movement/Physical"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Gross Motor",
+    "age_checkpoint": 12,
+    "age_min": 11,
+    "age_max": 14,
+    "milestone_text": "Picks things up between thumb and pointer finger, like small bits of food",
+    "original_domain": "Movement/Physical"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Social Interaction",
+    "age_checkpoint": 15,
+    "age_min": 13,
+    "age_max": 18,
+    "milestone_text": "Copies other children while playing, like taking toys out of a container when another child does",
+    "original_domain": "Social/Emotional"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Social Interaction",
+    "age_checkpoint": 15,
+    "age_min": 13,
+    "age_max": 18,
+    "milestone_text": "Shows you an object they like",
+    "original_domain": "Social/Emotional"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Social Interaction",
+    "age_checkpoint": 15,
+    "age_min": 13,
+    "age_max": 18,
+    "milestone_text": "Claps when excited",
+    "original_domain": "Social/Emotional"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Social Interaction",
+    "age_checkpoint": 15,
+    "age_min": 13,
+    "age_max": 18,
+    "milestone_text": "Hugs stuffed doll or other toy",
+    "original_domain": "Social/Emotional"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Social Interaction",
+    "age_checkpoint": 15,
+    "age_min": 13,
+    "age_max": 18,
+    "milestone_text": "Shows you affection (hugs, cuddles, or kisses you)",
+    "original_domain": "Social/Emotional"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Language",
+    "age_checkpoint": 15,
+    "age_min": 13,
+    "age_max": 18,
+    "milestone_text": "Tries to say one or two words besides 'mama' or 'dada', like 'ba' for ball or 'da' for dog",
+    "original_domain": "Language/Communication"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Language",
+    "age_checkpoint": 15,
+    "age_min": 13,
+    "age_max": 18,
+    "milestone_text": "Looks at a familiar object when you name it",
+    "original_domain": "Language/Communication"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Language",
+    "age_checkpoint": 15,
+    "age_min": 13,
+    "age_max": 18,
+    "milestone_text": "Follows directions given with both a gesture and words. For example, they give you a toy when you hold out your hand and say, 'Give me the toy.'",
+    "original_domain": "Language/Communication"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Language",
+    "age_checkpoint": 15,
+    "age_min": 13,
+    "age_max": 18,
+    "milestone_text": "Points to ask for something or to get help",
+    "original_domain": "Language/Communication"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Self-Directed Learning",
+    "age_checkpoint": 15,
+    "age_min": 13,
+    "age_max": 18,
+    "milestone_text": "Tries to use things the right way, like a phone, cup, or book",
+    "original_domain": "Cognitive"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Self-Directed Learning",
+    "age_checkpoint": 15,
+    "age_min": 13,
+    "age_max": 18,
+    "milestone_text": "Stacks at least two small objects, like blocks",
+    "original_domain": "Cognitive"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Gross Motor",
+    "age_checkpoint": 15,
+    "age_min": 13,
+    "age_max": 18,
+    "milestone_text": "Takes a few steps on their own",
+    "original_domain": "Movement/Physical"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Gross Motor",
+    "age_checkpoint": 15,
+    "age_min": 13,
+    "age_max": 18,
+    "milestone_text": "Uses fingers to feed themselves some food",
+    "original_domain": "Movement/Physical"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Social Interaction",
+    "age_checkpoint": 18,
+    "age_min": 16,
+    "age_max": 21,
+    "milestone_text": "Moves away from you, but looks to make sure you are close by",
+    "original_domain": "Social/Emotional"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Social Interaction",
+    "age_checkpoint": 18,
+    "age_min": 16,
+    "age_max": 21,
+    "milestone_text": "Points to show you something interesting",
+    "original_domain": "Social/Emotional"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Social Interaction",
+    "age_checkpoint": 18,
+    "age_min": 16,
+    "age_max": 21,
+    "milestone_text": "Puts hands out for you to wash them",
+    "original_domain": "Social/Emotional"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Social Interaction",
+    "age_checkpoint": 18,
+    "age_min": 16,
+    "age_max": 21,
+    "milestone_text": "Looks at a few pages in a book with you",
+    "original_domain": "Social/Emotional"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Social Interaction",
+    "age_checkpoint": 18,
+    "age_min": 16,
+    "age_max": 21,
+    "milestone_text": "Helps you dress them by pushing arm through sleeve or lifting up foot",
+    "original_domain": "Social/Emotional"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Language",
+    "age_checkpoint": 18,
+    "age_min": 16,
+    "age_max": 21,
+    "milestone_text": "Tries to say three or more words besides 'mama' or 'dada'",
+    "original_domain": "Language/Communication"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Language",
+    "age_checkpoint": 18,
+    "age_min": 16,
+    "age_max": 21,
+    "milestone_text": "Follows one-step directions without any gestures, like giving you the toy when you say, 'Give it to me.'",
+    "original_domain": "Language/Communication"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Self-Directed Learning",
+    "age_checkpoint": 18,
+    "age_min": 16,
+    "age_max": 21,
+    "milestone_text": "Copies you doing chores, like sweeping with a broom",
+    "original_domain": "Cognitive"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Self-Directed Learning",
+    "age_checkpoint": 18,
+    "age_min": 16,
+    "age_max": 21,
+    "milestone_text": "Plays with toys in a simple way, like pushing a toy car",
+    "original_domain": "Cognitive"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Gross Motor",
+    "age_checkpoint": 18,
+    "age_min": 16,
+    "age_max": 21,
+    "milestone_text": "Walks without holding on to anyone or anything",
+    "original_domain": "Movement/Physical"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Gross Motor",
+    "age_checkpoint": 18,
+    "age_min": 16,
+    "age_max": 21,
+    "milestone_text": "Scribbles",
+    "original_domain": "Movement/Physical"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Gross Motor",
+    "age_checkpoint": 18,
+    "age_min": 16,
+    "age_max": 21,
+    "milestone_text": "Drinks from a cup without a lid and may spill sometimes",
+    "original_domain": "Movement/Physical"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Gross Motor",
+    "age_checkpoint": 18,
+    "age_min": 16,
+    "age_max": 21,
+    "milestone_text": "Feeds themselves with their fingers",
+    "original_domain": "Movement/Physical"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Gross Motor",
+    "age_checkpoint": 18,
+    "age_min": 16,
+    "age_max": 21,
+    "milestone_text": "Tries to use a spoon",
+    "original_domain": "Movement/Physical"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Gross Motor",
+    "age_checkpoint": 18,
+    "age_min": 16,
+    "age_max": 21,
+    "milestone_text": "Climbs on and off a couch or chair without help",
+    "original_domain": "Movement/Physical"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Social Interaction",
+    "age_checkpoint": 24,
+    "age_min": 22,
+    "age_max": 27,
+    "milestone_text": "Notices when others are hurt or upset, like pausing or looking sad when someone is crying",
+    "original_domain": "Social/Emotional"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Social Interaction",
+    "age_checkpoint": 24,
+    "age_min": 22,
+    "age_max": 27,
+    "milestone_text": "Looks at your face to see how to react in a new situation",
+    "original_domain": "Social/Emotional"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Language",
+    "age_checkpoint": 24,
+    "age_min": 22,
+    "age_max": 27,
+    "milestone_text": "Points to things in a book when you ask, like 'Where is the bear?'",
+    "original_domain": "Language/Communication"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Language",
+    "age_checkpoint": 24,
+    "age_min": 22,
+    "age_max": 27,
+    "milestone_text": "Says at least two words together, like 'More milk'",
+    "original_domain": "Language/Communication"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Language",
+    "age_checkpoint": 24,
+    "age_min": 22,
+    "age_max": 27,
+    "milestone_text": "Points to at least two body parts when you ask them to show you",
+    "original_domain": "Language/Communication"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Language",
+    "age_checkpoint": 24,
+    "age_min": 22,
+    "age_max": 27,
+    "milestone_text": "Uses more gestures than just waving and pointing, like blowing a kiss or nodding yes",
+    "original_domain": "Language/Communication"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Self-Directed Learning",
+    "age_checkpoint": 24,
+    "age_min": 22,
+    "age_max": 27,
+    "milestone_text": "Holds something in one hand while using the other hand; for example, holding a container and taking the lid off",
+    "original_domain": "Cognitive"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Self-Directed Learning",
+    "age_checkpoint": 24,
+    "age_min": 22,
+    "age_max": 27,
+    "milestone_text": "Tries to use switches, knobs, or buttons on a toy",
+    "original_domain": "Cognitive"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Self-Directed Learning",
+    "age_checkpoint": 24,
+    "age_min": 22,
+    "age_max": 27,
+    "milestone_text": "Plays with more than one toy at the same time, like putting toy food on a toy plate",
+    "original_domain": "Cognitive"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Gross Motor",
+    "age_checkpoint": 24,
+    "age_min": 22,
+    "age_max": 27,
+    "milestone_text": "Kicks a ball",
+    "original_domain": "Movement/Physical"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Gross Motor",
+    "age_checkpoint": 24,
+    "age_min": 22,
+    "age_max": 27,
+    "milestone_text": "Runs",
+    "original_domain": "Movement/Physical"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Gross Motor",
+    "age_checkpoint": 24,
+    "age_min": 22,
+    "age_max": 27,
+    "milestone_text": "Walks (not climbs) up a few stairs with or without help",
+    "original_domain": "Movement/Physical"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Gross Motor",
+    "age_checkpoint": 24,
+    "age_min": 22,
+    "age_max": 27,
+    "milestone_text": "Eats with a spoon",
+    "original_domain": "Movement/Physical"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Social Interaction",
+    "age_checkpoint": 30,
+    "age_min": 28,
+    "age_max": 33,
+    "milestone_text": "Plays next to other children and sometimes plays with them",
+    "original_domain": "Social/Emotional"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Social Interaction",
+    "age_checkpoint": 30,
+    "age_min": 28,
+    "age_max": 33,
+    "milestone_text": "Shows you what they can do by saying, 'Look at me!'",
+    "original_domain": "Social/Emotional"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Social Interaction",
+    "age_checkpoint": 30,
+    "age_min": 28,
+    "age_max": 33,
+    "milestone_text": "Follows simple routines when told, like helping to pick up toys when you say, 'It's clean-up time.'",
+    "original_domain": "Social/Emotional"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Language",
+    "age_checkpoint": 30,
+    "age_min": 28,
+    "age_max": 33,
+    "milestone_text": "Says about 50 words",
+    "original_domain": "Language/Communication"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Language",
+    "age_checkpoint": 30,
+    "age_min": 28,
+    "age_max": 33,
+    "milestone_text": "Says two or more words, with one action word, like 'Doggie run'",
+    "original_domain": "Language/Communication"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Language",
+    "age_checkpoint": 30,
+    "age_min": 28,
+    "age_max": 33,
+    "milestone_text": "Names things in a book when you point and ask, 'What is this?'",
+    "original_domain": "Language/Communication"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Language",
+    "age_checkpoint": 30,
+    "age_min": 28,
+    "age_max": 33,
+    "milestone_text": "Says words like 'I,' 'me,' or 'we'",
+    "original_domain": "Language/Communication"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Self-Directed Learning",
+    "age_checkpoint": 30,
+    "age_min": 28,
+    "age_max": 33,
+    "milestone_text": "Uses things to pretend, like feeding a block to a doll as if it were food",
+    "original_domain": "Cognitive"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Self-Directed Learning",
+    "age_checkpoint": 30,
+    "age_min": 28,
+    "age_max": 33,
+    "milestone_text": "Shows simple problem-solving skills, like standing on a small stool to reach something",
+    "original_domain": "Cognitive"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Self-Directed Learning",
+    "age_checkpoint": 30,
+    "age_min": 28,
+    "age_max": 33,
+    "milestone_text": "Follows two-step instructions like 'Put the toy down and close the door'",
+    "original_domain": "Cognitive"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Self-Directed Learning",
+    "age_checkpoint": 30,
+    "age_min": 28,
+    "age_max": 33,
+    "milestone_text": "Shows they know at least one color, like pointing to a red crayon when you ask, 'Which one is red?'",
+    "original_domain": "Cognitive"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Gross Motor",
+    "age_checkpoint": 30,
+    "age_min": 28,
+    "age_max": 33,
+    "milestone_text": "Uses hands to twist things, like turning doorknobs or unscrewing lids",
+    "original_domain": "Movement/Physical"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Gross Motor",
+    "age_checkpoint": 30,
+    "age_min": 28,
+    "age_max": 33,
+    "milestone_text": "Takes some clothes off by themselves, like loose pants or an open jacket",
+    "original_domain": "Movement/Physical"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Gross Motor",
+    "age_checkpoint": 30,
+    "age_min": 28,
+    "age_max": 33,
+    "milestone_text": "Jumps off the ground with both feet",
+    "original_domain": "Movement/Physical"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Gross Motor",
+    "age_checkpoint": 30,
+    "age_min": 28,
+    "age_max": 33,
+    "milestone_text": "Turns book pages, one at a time, when you read to them",
+    "original_domain": "Movement/Physical"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Social Interaction",
+    "age_checkpoint": 36,
+    "age_min": 34,
+    "age_max": 39,
+    "milestone_text": "Calms down within 10 minutes after you leave them, like at a childcare drop off",
+    "original_domain": "Social/Emotional"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Social Interaction",
+    "age_checkpoint": 36,
+    "age_min": 34,
+    "age_max": 39,
+    "milestone_text": "Notices other children and joins them to play",
+    "original_domain": "Social/Emotional"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Language",
+    "age_checkpoint": 36,
+    "age_min": 34,
+    "age_max": 39,
+    "milestone_text": "Talks with you in conversation using at least two back-and-forth exchanges",
+    "original_domain": "Language/Communication"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Language",
+    "age_checkpoint": 36,
+    "age_min": 34,
+    "age_max": 39,
+    "milestone_text": "Asks 'who,' 'what,' 'where,' or 'why' questions, like 'Where is mommy/daddy?'",
+    "original_domain": "Language/Communication"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Language",
+    "age_checkpoint": 36,
+    "age_min": 34,
+    "age_max": 39,
+    "milestone_text": "Says what action is happening in a picture or book when asked, like 'running,' 'eating,' or 'playing'",
+    "original_domain": "Language/Communication"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Language",
+    "age_checkpoint": 36,
+    "age_min": 34,
+    "age_max": 39,
+    "milestone_text": "Says first name, when asked",
+    "original_domain": "Language/Communication"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Language",
+    "age_checkpoint": 36,
+    "age_min": 34,
+    "age_max": 39,
+    "milestone_text": "Talks well enough for others to understand, most of the time",
+    "original_domain": "Language/Communication"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Self-Directed Learning",
+    "age_checkpoint": 36,
+    "age_min": 34,
+    "age_max": 39,
+    "milestone_text": "Draws a circle, when you show them how",
+    "original_domain": "Cognitive"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Self-Directed Learning",
+    "age_checkpoint": 36,
+    "age_min": 34,
+    "age_max": 39,
+    "milestone_text": "Avoids touching hot objects, like a stove, when you warn them",
+    "original_domain": "Cognitive"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Gross Motor",
+    "age_checkpoint": 36,
+    "age_min": 34,
+    "age_max": 39,
+    "milestone_text": "Strings items together, like large beads or macaroni",
+    "original_domain": "Movement/Physical"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Gross Motor",
+    "age_checkpoint": 36,
+    "age_min": 34,
+    "age_max": 39,
+    "milestone_text": "Puts on some clothes by themselves, like loose pants or a jacket",
+    "original_domain": "Movement/Physical"
+  },
+  {
+    "source": "CDC Learn the Signs. Act Early",
+    "domain": "Gross Motor",
+    "age_checkpoint": 36,
+    "age_min": 34,
+    "age_max": 39,
+    "milestone_text": "Uses a fork",
+    "original_domain": "Movement/Physical"
+  }
+]

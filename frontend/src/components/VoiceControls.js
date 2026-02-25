@@ -10,7 +10,7 @@ import { Mic, MicOff, VolumeUp, VolumeOff, Stop } from '@mui/icons-material';
  * - Speech Recognition: Click mic to speak, text fills input
  * - Speech Synthesis: Toggle to auto-read responses aloud
  */
-function VoiceControls({ 
+function VoiceControls({
   onTranscript,
   autoSpeak = false,
   onAutoSpeakChange,
@@ -31,7 +31,7 @@ function VoiceControls({
     // Check for browser support
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     const SpeechSynthesis = window.speechSynthesis;
-    
+
     if (!SpeechRecognition || !SpeechSynthesis) {
       setSpeechSupported(false);
       console.warn('Web Speech API not supported in this browser');
@@ -52,21 +52,21 @@ function VoiceControls({
     recognition.onresult = (event) => {
       let sessionFinal = '';
       let interimTranscript = '';
-      
+
       // Process all results from this session
       for (let i = 0; i < event.results.length; i++) {
         const transcript = event.results[i][0].transcript;
-        
+
         if (event.results[i].isFinal) {
           sessionFinal += transcript + ' ';
         } else {
           interimTranscript += transcript;
         }
       }
-      
+
       // Update session transcript with final results
       sessionTranscriptRef.current = sessionFinal;
-      
+
       // Send complete transcript: accumulated from previous sessions + current session
       const completeTranscript = accumulatedTranscriptRef.current + sessionFinal + interimTranscript;
       if (onTranscript && completeTranscript.trim()) {
@@ -76,7 +76,7 @@ function VoiceControls({
 
     recognition.onerror = (event) => {
       console.error('Speech recognition error:', event.error);
-      
+
       if (event.error === 'not-allowed') {
         alert('Microphone permission denied. Please allow microphone access to use speech input.');
         setIsListening(false);
@@ -95,7 +95,7 @@ function VoiceControls({
         accumulatedTranscriptRef.current += sessionTranscriptRef.current;
         sessionTranscriptRef.current = '';
       }
-      
+
       // If user still wants to listen (didn't manually stop) and AI is not speaking, restart immediately
       if (shouldListen && !isSpeaking) {
         console.log('Recognition ended, restarting...');
@@ -160,26 +160,26 @@ function VoiceControls({
     if (isListening || shouldListen) {
       // Stop listening (transcript remains in message box for review)
       setShouldListen(false);
-      
+
       try {
         recognitionRef.current?.stop();
       } catch (error) {
         console.error('Failed to stop speech recognition:', error);
       }
-      
+
       setIsListening(false);
-      
+
       // Clear both transcript refs for next recording
       sessionTranscriptRef.current = '';
       accumulatedTranscriptRef.current = '';
     } else {
       // Start listening
       setShouldListen(true);
-      
+
       // Reset transcripts for new recording
       sessionTranscriptRef.current = '';
       accumulatedTranscriptRef.current = '';
-      
+
       try {
         recognitionRef.current?.start();
       } catch (error) {

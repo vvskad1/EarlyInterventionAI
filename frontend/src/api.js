@@ -3,7 +3,7 @@
  * Handles all communication with the FastAPI backend
  */
 
-const API_BASE_URL = 'http://34.222.146.19:8080';
+const API_BASE_URL = 'http://localhost:8080';
 
 /**
  * Upload knowledge base file (.txt or .md)
