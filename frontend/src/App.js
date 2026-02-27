@@ -434,11 +434,33 @@ function App() {
           autoHideDuration={4000}
           onClose={handleCloseSnackbar}
           anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+          sx={{ bottom: 40 }}
         >
           <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} sx={{ width: '100%' }}>
             {snackbar.message}
           </Alert>
         </Snackbar>
+
+        {/* Footer */}
+        <Box
+          sx={{
+            position: 'fixed',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            py: 0.5,
+            px: 2,
+            bgcolor: 'background.paper',
+            borderTop: '1px solid',
+            borderColor: 'divider',
+            zIndex: 1000,
+            textAlign: 'center',
+          }}
+        >
+          <Typography variant="caption" color="text.secondary">
+            Developed by Venkata Sai Krishna Aditya Vatturi
+          </Typography>
+        </Box>
       </Box>
     </ThemeProvider>
   );
