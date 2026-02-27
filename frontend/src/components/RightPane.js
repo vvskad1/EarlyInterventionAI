@@ -1145,6 +1145,13 @@ function RightPane({
           </IconButton>
         </Paper>
 
+        {/* Footer */}
+        <Box sx={{ mt: 1, textAlign: 'right' }}>
+          <Typography variant="caption" color="text.secondary" sx={{ opacity: 0.6 }}>
+            Developed by Venkata Sai Krishna Aditya Vatturi
+          </Typography>
+        </Box>
+
         {/* Evidence Drawer for Source Details */}
         <EvidenceDrawer
           open={drawerOpen}

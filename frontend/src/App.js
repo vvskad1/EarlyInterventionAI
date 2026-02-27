@@ -73,7 +73,7 @@ function App() {
     if (stored) {
       try {
         const parsed = JSON.parse(stored);
-        
+
         // Migrate old data structure: convert domain (string) to domains (array)
         const migratedChats = parsed.map(chat => {
           if (chat.domain && !chat.domains) {
@@ -91,7 +91,7 @@ function App() {
             notes: chat.notes || '',
           };
         });
-        
+
         setChats(migratedChats);
         // Set first chat as active
         if (migratedChats.length > 0) {
@@ -148,7 +148,7 @@ function App() {
       plan: null,
       messages: [],
     };
-    
+
     setChats((prev) => {
       const updated = [newChat, ...prev];
       return updated.slice(0, MAX_CHATS);
@@ -207,7 +207,7 @@ function App() {
 
     console.log('Current chat:', chat);
     console.log('Domains:', chat.domains, 'Type:', typeof chat.domains, 'IsArray:', Array.isArray(chat.domains));
-    
+
     if (!chat.age_months || !chat.domains || chat.domains.length === 0) {
       showSnackbar('Please select age and at least one area of concern', 'warning');
       return;
@@ -218,20 +218,20 @@ function App() {
     try {
       // Ensure domains is an array and has values
       const domainsArray = Array.isArray(chat.domains) ? chat.domains : [];
-      
+
       if (domainsArray.length === 0) {
         showSnackbar('Please select at least one area of concern', 'warning');
         setIsGenerating(false);
         return;
       }
-      
+
       const payload = {
         age_months: chat.age_months,
         domains: domainsArray,
         notes: chat.notes || null,
       };
       console.log('Sending plan request:', payload);
-      
+
       const result = await generatePlan(payload);
 
       // Update chat with plan and title (don't add to messages - it will show in plan sections)
@@ -281,7 +281,7 @@ function App() {
 
       // Speak the response if auto-speak is enabled
       if (autoSpeak && result.response) {
-        speak(result.response, 
+        speak(result.response,
           () => setIsSpeaking(true),  // onStart
           () => setIsSpeaking(false)  // onEnd
         );
@@ -405,7 +405,7 @@ function App() {
                 {themeMode === 'dark' ? <Brightness7 fontSize="small" /> : <Brightness4 fontSize="small" />}
               </IconButton>
             </Box>
-            
+
             {/* Empty State Content */}
             <Box
               sx={{
@@ -434,33 +434,11 @@ function App() {
           autoHideDuration={4000}
           onClose={handleCloseSnackbar}
           anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-          sx={{ bottom: 40 }}
         >
           <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} sx={{ width: '100%' }}>
             {snackbar.message}
           </Alert>
         </Snackbar>
-
-        {/* Footer */}
-        <Box
-          sx={{
-            position: 'fixed',
-            bottom: 0,
-            left: 0,
-            right: 0,
-            py: 0.5,
-            px: 2,
-            bgcolor: 'background.paper',
-            borderTop: '1px solid',
-            borderColor: 'divider',
-            zIndex: 1000,
-            textAlign: 'center',
-          }}
-        >
-          <Typography variant="caption" color="text.secondary">
-            Developed by Venkata Sai Krishna Aditya Vatturi
-          </Typography>
-        </Box>
       </Box>
     </ThemeProvider>
   );
