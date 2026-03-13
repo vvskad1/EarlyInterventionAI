@@ -297,7 +297,7 @@ def retrieve_for_plan_sections(
     Enhanced retrieval that gets diverse sources for different plan sections.
     
     **Strategy:**
-    - Goals: Age + domain filtered milestones (what to target)
+    - Outcomes: Age + domain filtered milestones (what to target)
     - Strategies: FGRBI coaching techniques + parsed strategies (how to coach)
     - Advice: FGRBI family engagement content (supporting parents)
     
@@ -331,7 +331,7 @@ def retrieve_for_plan_sections(
             query_parts.append(extra_info)
         query_text = " ".join(query_parts) if query_parts else "developmental milestones and coaching strategies"
         
-        # === MILESTONE RETRIEVAL (for Goals section) ===
+        # === MILESTONE RETRIEVAL (for Outcomes section) ===
         # Domain + age filtered milestones
         milestone_docs = []
         if domain:

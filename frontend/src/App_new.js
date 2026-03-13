@@ -30,7 +30,7 @@ const MAX_CHATS = 25;
  *       id: string,
  *       age_months: number,
  *       domain: string,
- *       plan: { Goals, Strategies, "Advice for Parents" },
+ *       plan: { Outcomes, Strategies, "Advice for Parents" },
  *       messages: [{role, content}]
  *     }
  *   ]
@@ -164,11 +164,11 @@ function App() {
       prev.map((c) =>
         c.id === activeChatId
           ? {
-              ...c,
-              conversations: c.conversations.map((conv) =>
-                conv.id === activeConversationId ? { ...conv, ...updates } : conv
-              ),
-            }
+            ...c,
+            conversations: c.conversations.map((conv) =>
+              conv.id === activeConversationId ? { ...conv, ...updates } : conv
+            ),
+          }
           : c
       )
     );
@@ -286,7 +286,7 @@ function App() {
   // Update conversation fields (age/domain)
   const handleUpdateConversation = (field, value) => {
     if (!activeConversation) return;
-    
+
     const updates = { [field]: value };
     updateConversation(updates);
 

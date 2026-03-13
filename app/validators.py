@@ -2,10 +2,10 @@
 Output validation for Early Intervention plan quality.
 
 Implements pre-output checks to catch common reliability issues:
-- Vocabulary count goals
+- Vocabulary count outcomes
 - Unexplained frameworks/acronyms
 - Unrealistic developmental targets
-- Non-functional goal phrasing
+- Non-functional outcome phrasing
 - Missing citations and sources
 - Insufficient content in required sections
 - Source hallucination and URL fabrication
@@ -17,7 +17,7 @@ from typing import Dict, List, Tuple, Optional, Set
 class PlanValidator:
     """Validates intervention plan outputs for EI best practices."""
     
-    # Patterns that indicate problematic goal phrasing
+    # Patterns that indicate problematic outcome phrasing
     VOCAB_COUNT_PATTERNS = [
         r'\b(\d+)[\s-]+words?\b',           # "20 words", "5 words"
         r'\bvocabulary\s+(?:to|of)\s+\d+',  # "vocabulary to 50"
@@ -53,7 +53,7 @@ class PlanValidator:
         
         Args:
             content: Full markdown content
-            section_name: Name of section to extract (e.g., "Goals", "Strategies")
+            section_name: Name of section to extract (e.g., "Outcomes", "Strategies")
             
         Returns:
             Extracted section text or None if not found
@@ -86,12 +86,12 @@ class PlanValidator:
         return len(citations) > 0, len(citations)
     
     @classmethod
-    def validate_goals(cls, goals_text: str, age_months: int = None) -> Tuple[bool, List[str]]:
+    def validate_outcomes(cls, outcomes_text: str, age_months: int = None) -> Tuple[bool, List[str]]:
         """
-        Validate goal quality against EI best practices.
+        Validate outcome quality against EI best practices.
         
         Args:
-            goals_text: The goals section text to validate
+            outcomes_text: The outcomes section text to validate
             age_months: Child's age in months (optional, for age-specific checks)
             
         Returns:
@@ -99,36 +99,36 @@ class PlanValidator:
         """
         warnings = []
         
-        if not goals_text:
-            warnings.append("❌ MISSING SECTION: Goals section is empty or missing")
+        if not outcomes_text:
+            warnings.append("❌ MISSING SECTION: Outcomes section is empty or missing")
             return False, warnings
         
-        # Check for minimum number of goals (at least 2)
-        num_goals = cls.count_bullet_points(goals_text)
-        if num_goals < 2:
+        # Check for minimum number of outcomes (at least 2)
+        num_outcomes = cls.count_bullet_points(outcomes_text)
+        if num_outcomes < 2:
             warnings.append(
-                f"❌ INSUFFICIENT GOALS: Only {num_goals} goal(s) provided. Minimum 2-3 required."
+                f"❌ INSUFFICIENT OUTCOMES: Only {num_outcomes} outcome(s) provided. Minimum 2-3 required."
             )
         
-        # Check for citations in goals
-        has_citations, citation_count = cls.check_citations(goals_text)
+        # Check for citations in outcomes
+        has_citations, citation_count = cls.check_citations(outcomes_text)
         if not has_citations:
             warnings.append(
-                "❌ MISSING CITATIONS: Goals must include inline citations to RAG sources (e.g., 'Source 1')"
+                "❌ MISSING CITATIONS: Outcomes must include inline citations to RAG sources (e.g., 'Source 1')"
             )
         
-        # Check for vocabulary count goals
+        # Check for vocabulary count outcomes
         for pattern in cls.VOCAB_COUNT_PATTERNS:
-            if re.search(pattern, goals_text, re.IGNORECASE):
+            if re.search(pattern, outcomes_text, re.IGNORECASE):
                 warnings.append(
-                    "❌ VOCABULARY COUNT GOAL: Goals should focus on functional use "
+                    "❌ VOCABULARY COUNT OUTCOME: Outcomes should focus on functional use "
                     "(request, label, comment) rather than word counts"
                 )
                 break
         
         # Check for sentence length targets
         for pattern in cls.SENTENCE_LENGTH_PATTERNS:
-            match = re.search(pattern, goals_text, re.IGNORECASE)
+            match = re.search(pattern, outcomes_text, re.IGNORECASE)
             if match:
                 sentence_length = int(match.group(1))
                 if age_months and age_months < 24 and sentence_length > 2:
@@ -145,10 +145,10 @@ class PlanValidator:
         
         # Check for routine embedding
         routine_keywords = ['during', 'snack', 'play', 'diaper', 'bath', 'meal', 'dressing', 'routine']
-        has_routine_context = any(keyword in goals_text.lower() for keyword in routine_keywords)
+        has_routine_context = any(keyword in outcomes_text.lower() for keyword in routine_keywords)
         if not has_routine_context:
             warnings.append(
-                "⚠️ ROUTINE CONTEXT: Goals should specify routines/contexts "
+                "⚠️ ROUTINE CONTEXT: Outcomes should specify routines/contexts "
                 "(e.g., 'during snack and play')"
             )
         
@@ -158,10 +158,10 @@ class PlanValidator:
             r'\d+\s+seconds?',                # "10 seconds"
             r'\d+\s+times?',                  # "3 times"
         ]
-        has_criterion = any(re.search(p, goals_text, re.IGNORECASE) for p in measurable_patterns)
+        has_criterion = any(re.search(p, outcomes_text, re.IGNORECASE) for p in measurable_patterns)
         if not has_criterion:
             warnings.append(
-                "⚠️ MEASURABILITY: Goals should include specific criteria "
+                "⚠️ MEASURABILITY: Outcomes should include specific criteria "
                 "(e.g., '4 out of 5 opportunities')"
             )
         
@@ -533,7 +533,7 @@ class PlanValidator:
         # Check if plan has the expected structure
         if 'Intervention_Plan' not in plan_json:
             # Legacy format support
-            if 'Goals' in plan_json:
+            if 'Outcomes' in plan_json:
                 return cls._validate_legacy_format(plan_json, age_months)
             
             all_warnings['Structure'] = ["❌ MISSING KEY: Response must contain 'Intervention_Plan' key"]
@@ -546,18 +546,18 @@ class PlanValidator:
             all_warnings['Structure'] = ["⚠️ MISSING HEADING: Should start with '## Intervention Plan'"]
         
         # Extract and validate each section
-        goals_text = cls.extract_section(content, 'Goals')
+        outcomes_text = cls.extract_section(content, 'Outcomes')
         strategies_text = cls.extract_section(content, 'Strategies')
         advice_text = cls.extract_section(content, 'Advice for Parents')
         sources_text = cls.extract_section(content, 'Sources')
         
-        # Validate Goals
-        if goals_text is not None:
-            goals_valid,goals_warnings = cls.validate_goals(goals_text, age_months)
-            if goals_warnings:
-                all_warnings['Goals'] = goals_warnings
+        # Validate Outcomes
+        if outcomes_text is not None:
+            outcomes_valid, outcomes_warnings = cls.validate_outcomes(outcomes_text, age_months)
+            if outcomes_warnings:
+                all_warnings['Outcomes'] = outcomes_warnings
         else:
-            all_warnings['Goals'] = ["❌ MISSING SECTION: Goals section not found"]
+            all_warnings['Outcomes'] = ["❌ MISSING SECTION: Outcomes section not found"]
         
         # Validate Strategies
         if strategies_text is not None:
@@ -597,10 +597,10 @@ class PlanValidator:
         """Support for legacy format validation."""
         all_warnings = {}
         
-        # Validate Goals
-        if 'Goals' in plan_json:
-            goals_valid, goals_warnings = cls.validate_goals(
-                plan_json['Goals'], 
+        # Validate Outcomes
+        if 'Outcomes' in plan_json:
+            outcomes_valid, outcomes_warnings = cls.validate_outcomes(
+                plan_json['Outcomes'],
                 age_months
             )
             if goals_warnings:
@@ -705,10 +705,10 @@ def verify_critical_requirements(
     
     This is a strict check that MUST pass before any response is returned.
     Checks:
-    1. At least 2 goals are present
+    1. At least 2 outcomes are present
     2. At least 4 strategies are present
     3. At least 4 advice bullet points are present
-    4. Citations are present in goals
+    4. Citations are present in outcomes
     5. A Sources section is included
     6. Sources match retrieved RAG context (no hallucination)
     
@@ -759,11 +759,11 @@ def verify_critical_requirements(
     else:
         failed_requirements.append("Advice for Parents section missing")
     
-    # Requirement 4: Citations present in goals
-    if goals_text:
-        has_citations, citation_count = validator.check_citations(goals_text)
+    # Requirement 4: Citations present in outcomes
+    if outcomes_text:
+        has_citations, _ = validator.check_citations(outcomes_text)
         if not has_citations:
-            failed_requirements.append("No citations found in Goals section")
+            failed_requirements.append("No citations found in Outcomes section")
     
     # Requirement 5: Sources section is included
     sources_text = validator.extract_section(content, 'Sources')

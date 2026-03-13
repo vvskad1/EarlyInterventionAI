@@ -34,7 +34,7 @@ export async function uploadKB(file) {
  * @param {string[]} data.domains - Array of development domains
  * @param {string} data.notes - Additional notes about the child (optional)
  * @param {string} data.extra_info - Additional context (optional)
- * @returns {Promise<Object>} Response with Goals, Strategies, and Advice for Parents
+ * @returns {Promise<Object>} Response with Outcomes, Strategies, and Advice for Parents
  */
 export async function generatePlan(data) {
   const response = await fetch(`${API_BASE_URL}/api/plan`, {

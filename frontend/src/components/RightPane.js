@@ -37,9 +37,9 @@ function parseInterventionPlan(markdownContent) {
   // Extract sections using regex
   const sections = {};
 
-  // Match ### 🎯 Goals ... (content until next ###)
-  const goalsMatch = markdownContent.match(/###\s*🎯\s*Goals\s*\n(.*?)(?=###|$)/s);
-  if (goalsMatch) sections.Goals = goalsMatch[1].trim();
+  // Match ### 🎯 Outcomes ... (content until next ###)
+  const outcomesMatch = markdownContent.match(/###\s*🎯\s*Outcomes\s*\n(.*?)(?=###|$)/s);
+  if (outcomesMatch) sections.Outcomes = outcomesMatch[1].trim();
 
   // Match ### 🔧 Strategies
   const strategiesMatch = markdownContent.match(/###\s*🔧\s*Strategies\s*\n(.*?)(?=###|$)/s);
@@ -143,7 +143,7 @@ function renderChatMessage(content, onCitationClick) {
  * - Age/Domains controls
  * - Notes field
  * - Generate button
- * - Plan sections (Goals, Strategies, Advice)
+ * - Plan sections (Outcomes, Strategies, Advice)
  * - Chat messages
  * - Bottom input dock with voice controls
  */
@@ -205,7 +205,7 @@ function RightPane({
 
   const isStructuredPlan = Boolean(
     plan &&
-    Array.isArray(plan.goals) &&
+    Array.isArray(plan.outcomes) &&
     Array.isArray(plan.strategies) &&
     Array.isArray(plan.advice) &&
     Array.isArray(plan.sources)
@@ -229,8 +229,8 @@ function RightPane({
     : (parsedPlan?.Sources ? parseSources(parsedPlan.Sources) : []);
 
   const goalCitationIds = isStructuredPlan
-    ? [...new Set((plan.goals || []).map((goal) => goal.source).filter(Boolean))]
-    : extractCitations(parsedPlan?.Goals || '');
+    ? [...new Set((plan.outcomes || []).map((outcome) => outcome.source).filter(Boolean))]
+    : extractCitations(parsedPlan?.Outcomes || '');
 
   const strategyCitationIds = isStructuredPlan
     ? [...new Set((plan.strategies || []).map((strategy) => strategy.source).filter(Boolean))]
@@ -243,7 +243,7 @@ function RightPane({
   // Calculate confidence
   const confidence = (isStructuredPlan || parsedPlan)
     ? calculateConfidence({
-      goals: isStructuredPlan ? (plan.goals || []).map((goal) => `${goal.text} (Source ${goal.source})`).join('\n') : (parsedPlan?.Goals || ''),
+      outcomes: isStructuredPlan ? (plan.outcomes || []).map((outcome) => `${outcome.text} (Source ${outcome.source})`).join('\n') : (parsedPlan?.Outcomes || ''),
       strategies: isStructuredPlan ? (plan.strategies || []).map((strategy) => `${strategy.name} (Source ${strategy.source})`).join('\n') : (parsedPlan?.Strategies || ''),
       advice: isStructuredPlan ? (plan.advice || []).map((item) => `${item.text} (Source ${item.source})`).join('\n') : (parsedPlan?.['Advice for Parents'] || ''),
     }, sources)
@@ -759,7 +759,7 @@ function RightPane({
                   )}
                 </Box>
 
-                {/* Goals Section */}
+                {/* Outcomes Section */}
                 <Card
                   variant="outlined"
                   sx={{
@@ -782,12 +782,12 @@ function RightPane({
                         color: 'primary.main',
                       }}
                     >
-                      🎯 Goals
+                      🎯 Outcomes
                     </Typography>
                     <Box component="ul" sx={{ pl: 3, m: 0, listStyleType: 'disc' }}>
                       {(isStructuredPlan
-                        ? (plan.goals || []).map((goal) => `${goal.text} (Source ${goal.source})`)
-                        : parseBulletPoints(parsedPlan?.Goals || '')
+                        ? (plan.outcomes || []).map((outcome) => `${outcome.text} (Source ${outcome.source})`)
+                        : parseBulletPoints(parsedPlan?.Outcomes || '')
                       ).map((bullet, idx) => (
                         <Typography
                           key={idx}
@@ -1144,13 +1144,6 @@ function RightPane({
             )}
           </IconButton>
         </Paper>
-
-        {/* Footer */}
-        <Box sx={{ mt: 1, textAlign: 'right' }}>
-          <Typography variant="caption" color="text.secondary" sx={{ opacity: 0.6 }}>
-            Developed by Venkata Sai Krishna Aditya Vatturi
-          </Typography>
-        </Box>
 
         {/* Evidence Drawer for Source Details */}
         <EvidenceDrawer

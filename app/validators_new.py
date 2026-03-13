@@ -2,7 +2,7 @@
 Simplified output validation for structured JSON intervention plans.
 
 This validator keeps the structural checks from the JSON migration while
-preserving critical EI quality checks (age appropriateness, goal quality,
+preserving critical EI quality checks (age appropriateness, outcome quality,
 and citation/source grounding).
 """
 import re
@@ -60,7 +60,7 @@ def _extract_rag_source_map(rag_context: str) -> Dict[int, str]:
 
 
 def _goal_has_measurable_components(goal_text: str) -> bool:
-    """Heuristic check for measurable criterion + timeframe in a goal sentence."""
+    """Heuristic check for measurable criterion + timeframe in an outcome sentence."""
     text = goal_text.lower()
     has_measure = bool(re.search(r'\b\d+\s*/\s*\d+\b|\bout of\s+\d+\b|\bopportunit(?:y|ies)\b|\bseconds?\b|\bminutes?\b|\btimes?\b', text))
     has_timeframe = bool(re.search(r'\b(across|within|over|by|for)\b.*\b(day|days|week|weeks|month|months)\b', text))
@@ -82,7 +82,7 @@ def validate_intervention_plan_json(
     Validate structured JSON intervention plan.
     
     Args:
-        plan_data: Parsed JSON with goals, strategies, advice, sources arrays
+        plan_data: Parsed JSON with outcomes, strategies, advice, sources arrays
         age_months: Child's age in months (optional)
         rag_context: RAG context for source validation (optional)
         
@@ -96,49 +96,49 @@ def validate_intervention_plan_json(
     rag_source_map = _extract_rag_source_map(rag_context)
     available_sources = set(rag_source_map.keys())
     
-    # === CHECK GOALS ===
-    if 'goals' not in plan_data or not isinstance(plan_data['goals'], list):
-        errors.append("❌ MISSING: 'goals' array is required")
+    # === CHECK OUTCOMES ===
+    if 'outcomes' not in plan_data or not isinstance(plan_data['outcomes'], list):
+        errors.append("❌ MISSING: 'outcomes' array is required")
     else:
-        goals = plan_data['goals']
-        if len(goals) < 2:
-            errors.append(f"❌ INSUFFICIENT GOALS: {len(goals)} provided, minimum 2 required")
+        outcomes = plan_data['outcomes']
+        if len(outcomes) < 2:
+            errors.append(f"❌ INSUFFICIENT OUTCOMES: {len(outcomes)} provided, minimum 2 required")
         
-        for i, goal in enumerate(goals, 1):
-            if not isinstance(goal, dict):
-                errors.append(f"❌ GOAL {i}: Must be an object with 'text' and 'source' fields")
+        for i, outcome in enumerate(outcomes, 1):
+            if not isinstance(outcome, dict):
+                errors.append(f"❌ OUTCOME {i}: Must be an object with 'text' and 'source' fields")
                 continue
             
-            if 'text' not in goal or not goal['text'].strip():
-                errors.append(f"❌ GOAL {i}: Missing 'text' field")
+            if 'text' not in outcome or not outcome['text'].strip():
+                errors.append(f"❌ OUTCOME {i}: Missing 'text' field")
             
-            if 'source' not in goal:
-                errors.append(f"❌ GOAL {i}: Missing 'source' citation")
-            elif available_sources and goal['source'] not in available_sources:
-                errors.append(f"❌ GOAL {i}: Cites Source {goal['source']} but only {available_sources} available in RAG context")
+            if 'source' not in outcome:
+                errors.append(f"❌ OUTCOME {i}: Missing 'source' citation")
+            elif available_sources and outcome['source'] not in available_sources:
+                errors.append(f"❌ OUTCOME {i}: Cites Source {outcome['source']} but only {available_sources} available in RAG context")
 
-            goal_text = (goal.get('text') or '').strip()
-            if goal_text:
+            outcome_text = (outcome.get('text') or '').strip()
+            if outcome_text:
                 # Disallow vocabulary-count and sentence-length targets
                 for pattern in VOCAB_COUNT_PATTERNS:
-                    if re.search(pattern, goal_text, re.IGNORECASE):
-                        errors.append(f"❌ GOAL {i}: Uses vocabulary-count target ('{goal_text[:80]}...') which is not allowed")
+                    if re.search(pattern, outcome_text, re.IGNORECASE):
+                        errors.append(f"❌ OUTCOME {i}: Uses vocabulary-count target ('{outcome_text[:80]}...') which is not allowed")
                         break
 
                 if age_months is not None and age_months < 24:
                     for pattern in SENTENCE_LENGTH_PATTERNS:
-                        if re.search(pattern, goal_text, re.IGNORECASE):
-                            errors.append(f"❌ GOAL {i}: Sentence-length targets are not age-appropriate for children under 24 months")
+                        if re.search(pattern, outcome_text, re.IGNORECASE):
+                            errors.append(f"❌ OUTCOME {i}: Sentence-length targets are not age-appropriate for children under 24 months")
                             break
 
-                if any(re.search(pattern, goal_text, re.IGNORECASE) for pattern in GENERIC_GOAL_PATTERNS):
-                    errors.append(f"❌ GOAL {i}: Goal is too generic; use observable and measurable IFSP-style phrasing")
+                if any(re.search(pattern, outcome_text, re.IGNORECASE) for pattern in GENERIC_GOAL_PATTERNS):
+                    errors.append(f"❌ OUTCOME {i}: Outcome is too generic; use observable and measurable IFSP-style phrasing")
 
-                if not _goal_has_measurable_components(goal_text):
-                    errors.append(f"❌ GOAL {i}: Missing measurable criterion or clear timeframe (use X/Y or duration + time window)")
+                if not _goal_has_measurable_components(outcome_text):
+                    errors.append(f"❌ OUTCOME {i}: Missing measurable criterion or clear timeframe (use X/Y or duration + time window)")
 
-                if not _goal_has_routine_context(goal_text):
-                    errors.append(f"❌ GOAL {i}: Missing routine/context phrase (e.g., 'During play routines...')")
+                if not _goal_has_routine_context(outcome_text):
+                    errors.append(f"❌ OUTCOME {i}: Missing routine/context phrase (e.g., 'During play routines...')")
     
     # === CHECK STRATEGIES ===
     if 'strategies' not in plan_data or not isinstance(plan_data['strategies'], list):
@@ -238,9 +238,9 @@ def validate_intervention_plan_json(
 
     # Cross-check: all cited source IDs should be listed in sources[]
     cited_ids = set()
-    for goal in plan_data.get('goals', []) if isinstance(plan_data.get('goals', []), list) else []:
-        if isinstance(goal, dict) and isinstance(goal.get('source'), int):
-            cited_ids.add(goal['source'])
+    for outcome in plan_data.get('outcomes', []) if isinstance(plan_data.get('outcomes', []), list) else []:
+        if isinstance(outcome, dict) and isinstance(outcome.get('source'), int):
+            cited_ids.add(outcome['source'])
     for strategy in plan_data.get('strategies', []) if isinstance(plan_data.get('strategies', []), list) else []:
         if isinstance(strategy, dict) and isinstance(strategy.get('source'), int):
             cited_ids.add(strategy['source'])
@@ -306,19 +306,19 @@ def verify_critical_requirements(
     failed = []
     
     # Check key arrays exist
-    if 'goals' not in plan_data or not isinstance(plan_data['goals'], list):
-        failed.append("Missing 'goals' array")
-    elif len(plan_data['goals']) < 2:
-        failed.append(f"Only {len(plan_data['goals'])} goal(s) - minimum 2 required")
+    if 'outcomes' not in plan_data or not isinstance(plan_data['outcomes'], list):
+        failed.append("Missing 'outcomes' array")
+    elif len(plan_data['outcomes']) < 2:
+        failed.append(f"Only {len(plan_data['outcomes'])} outcome(s) - minimum 2 required")
     else:
-        for idx, goal in enumerate(plan_data['goals'], 1):
-            if not isinstance(goal, dict):
-                failed.append(f"Goal {idx} must be an object")
+        for idx, outcome in enumerate(plan_data['outcomes'], 1):
+            if not isinstance(outcome, dict):
+                failed.append(f"Outcome {idx} must be an object")
                 continue
-            if not goal.get('text'):
-                failed.append(f"Goal {idx} missing 'text'")
-            if 'source' not in goal:
-                failed.append(f"Goal {idx} missing 'source'")
+            if not outcome.get('text'):
+                failed.append(f"Outcome {idx} missing 'text'")
+            if 'source' not in outcome:
+                failed.append(f"Outcome {idx} missing 'source'")
     
     if 'strategies' not in plan_data or not isinstance(plan_data['strategies'], list):
         failed.append("Missing 'strategies' array")
@@ -369,9 +369,9 @@ def verify_critical_requirements(
                 failed.append(f"Source {idx} missing 'title'")
 
         cited_ids = set()
-        for goal in plan_data.get('goals', []):
-            if isinstance(goal, dict) and isinstance(goal.get('source'), int):
-                cited_ids.add(goal['source'])
+        for outcome in plan_data.get('outcomes', []):
+            if isinstance(outcome, dict) and isinstance(outcome.get('source'), int):
+                cited_ids.add(outcome['source'])
         for strategy in plan_data.get('strategies', []):
             if isinstance(strategy, dict) and isinstance(strategy.get('source'), int):
                 cited_ids.add(strategy['source'])

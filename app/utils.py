@@ -22,7 +22,7 @@ def extract_or_repair_json(text: str) -> Dict[str, Any]:
         Parsed dictionary with at least the expected structure
     """
     def is_plan_payload(candidate: Any) -> bool:
-        return isinstance(candidate, dict) and ('goals' in candidate or 'Intervention_Plan' in candidate)
+        return isinstance(candidate, dict) and ('outcomes' in candidate or 'Intervention_Plan' in candidate)
 
     def try_parse(candidate_text: str) -> Dict[str, Any] | None:
         try:
@@ -143,7 +143,7 @@ def extract_or_repair_json(text: str) -> Dict[str, Any]:
 
     # Strategy 6: Final fallback - return minimal valid structure for new structured format
     fallback = {
-        "goals": [],
+        "outcomes": [],
         "strategies": [],
         "advice": [],
         "sources": []
@@ -164,7 +164,7 @@ def ensure_json_keys(data: Dict[str, Any], required_keys: list) -> Dict[str, Any
     """
     Ensure a dictionary contains all required keys, adding defaults if missing.
     
-    Supports both new format (Intervention_Plan) and legacy format (Goals, Strategies, etc.).
+    Supports both new format (Intervention_Plan) and legacy format (Outcomes, Strategies, etc.).
     
     Args:
         data: Dictionary to validate
@@ -178,7 +178,7 @@ def ensure_json_keys(data: Dict[str, Any], required_keys: list) -> Dict[str, Any
         if 'Intervention_Plan' not in data:
             data['Intervention_Plan'] = """## Intervention Plan
 
-### 🎯 Goals
+### 🎯 Outcomes
 (Default content - key was missing)
 
 ### 🔧 Strategies
@@ -289,9 +289,9 @@ def normalize_sources_from_rag_context(plan_data: Dict, rag_context: str) -> Dic
 
     # Add any cited IDs missing from sources list
     cited_ids = set()
-    for goal in plan_data.get('goals', []) if isinstance(plan_data.get('goals'), list) else []:
-        if isinstance(goal, dict) and isinstance(goal.get('source'), int):
-            cited_ids.add(goal['source'])
+    for outcome in plan_data.get('outcomes', []) if isinstance(plan_data.get('outcomes'), list) else []:
+        if isinstance(outcome, dict) and isinstance(outcome.get('source'), int):
+            cited_ids.add(outcome['source'])
     for strategy in plan_data.get('strategies', []) if isinstance(plan_data.get('strategies'), list) else []:
         if isinstance(strategy, dict) and isinstance(strategy.get('source'), int):
             cited_ids.add(strategy['source'])
@@ -312,14 +312,14 @@ def normalize_sources_from_rag_context(plan_data: Dict, rag_context: str) -> Dic
     return plan_data
 
 
-def sanitize_vocabulary_count_goals(plan_data: Dict[str, Any]) -> Dict[str, Any]:
+def sanitize_vocabulary_count_outcomes(plan_data: Dict[str, Any]) -> Dict[str, Any]:
     """
-    Rewrite disallowed vocabulary-count goals into functional communication goals.
+    Rewrite disallowed vocabulary-count outcomes into functional communication outcomes.
 
     This keeps the plan clinically aligned with validator policy while avoiding
     repeated retry failures when LLM insists on "X words" targets.
     """
-    if not isinstance(plan_data, dict) or not isinstance(plan_data.get('goals'), list):
+    if not isinstance(plan_data, dict) or not isinstance(plan_data.get('outcomes'), list):
         return plan_data
 
     replacements = [
@@ -341,17 +341,17 @@ def sanitize_vocabulary_count_goals(plan_data: Dict[str, Any]) -> Dict[str, Any]
         (r'\bvocabulary\s+of\s+\d+\b', 'functional communication in routines'),
     ]
 
-    for goal in plan_data['goals']:
-        if not isinstance(goal, dict) or not isinstance(goal.get('text'), str):
+    for outcome in plan_data['outcomes']:
+        if not isinstance(outcome, dict) or not isinstance(outcome.get('text'), str):
             continue
 
-        updated_text = goal['text']
+        updated_text = outcome['text']
         for pattern, replacement in replacements:
             updated_text = re.sub(pattern, replacement, updated_text, flags=re.IGNORECASE)
 
         # Cleanup duplicate spacing introduced by replacements
         updated_text = re.sub(r'\s{2,}', ' ', updated_text).strip()
-        goal['text'] = updated_text
+        outcome['text'] = updated_text
 
     return plan_data
 
@@ -364,7 +364,7 @@ def enrich_emotional_regulation_content(
     """
     Deterministically enrich plans for tantrum/transition emotional-regulation cases.
 
-    Adds one measurable emotional regulation goal and one co-regulation strategy if
+    Adds one measurable emotional regulation outcome and one co-regulation strategy if
     the case context suggests transition distress/tantrums and content is missing.
     """
     if not isinstance(plan_data, dict):
@@ -383,8 +383,8 @@ def enrich_emotional_regulation_content(
     if not (has_reg_domain or has_transition_distress):
         return plan_data
 
-    if not isinstance(plan_data.get('goals'), list):
-        plan_data['goals'] = []
+    if not isinstance(plan_data.get('outcomes'), list):
+        plan_data['outcomes'] = []
     if not isinstance(plan_data.get('strategies'), list):
         plan_data['strategies'] = []
     if not isinstance(plan_data.get('advice'), list):
@@ -398,14 +398,14 @@ def enrich_emotional_regulation_content(
                 source_id = src['id']
                 break
 
-    # Ensure at least one explicit emotional regulation goal
-    goal_text_all = " ".join(
-        g.get('text', '') for g in plan_data['goals'] if isinstance(g, dict)
+    # Ensure at least one explicit emotional regulation outcome
+    outcome_text_all = " ".join(
+        g.get('text', '') for g in plan_data['outcomes'] if isinstance(g, dict)
     ).lower()
-    has_reg_goal = any(token in goal_text_all for token in ["tantrum", "transition", "calm", "co-reg", "emotion"])
+    has_reg_outcome = any(token in outcome_text_all for token in ["tantrum", "transition", "calm", "co-reg", "emotion"])
 
-    if not has_reg_goal:
-        plan_data['goals'].append({
+    if not has_reg_outcome:
+        plan_data['outcomes'].append({
             "text": "During transitions, child will use a supported calming strategy (e.g., visual cue, comfort object, or co-regulated breathing) and return to a calm state within 3 minutes in 4 out of 5 opportunities across 2 weeks.",
             "source": source_id,
         })

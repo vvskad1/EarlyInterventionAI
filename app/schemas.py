@@ -23,9 +23,9 @@ class PlanRequest(BaseModel):
         }
 
 
-class Goal(BaseModel):
-    """Individual goal with text and source citation."""
-    text: str = Field(..., description="Goal text with routine, behavior, measurement, and timeframe")
+class Outcome(BaseModel):
+    """Individual outcome with text and source citation."""
+    text: str = Field(..., description="Outcome text with routine, behavior, measurement, and timeframe")
     source: int = Field(..., description="Source ID number")
 
 
@@ -62,7 +62,7 @@ class SafetyAlert(BaseModel):
 
 class PlanResponse(BaseModel):
     """Response model for intervention plans with structured data."""
-    goals: List[Goal] = Field(..., description="List of intervention goals")
+    outcomes: List[Outcome] = Field(..., description="List of intervention outcomes")
     strategies: List[Strategy] = Field(..., description="List of intervention strategies")
     advice: List[Advice] = Field(..., description="List of advice for parents")
     sources: List[Source] = Field(..., description="List of cited sources")
@@ -77,7 +77,7 @@ class PlanResponse(BaseModel):
             "example": {
                 "Intervention_Plan": """## Intervention Plan
 
-### 🎯 Goals
+### 🎯 Outcomes
 - During snack and play routines, child will use gestures/signs/words to request preferred items in 4 out of 5 opportunities across 2 consecutive weeks (Source 1).
 - During floor play, child will maintain sitting balance for 10 seconds in 3 out of 5 trials for 1 week (Source 2).
 

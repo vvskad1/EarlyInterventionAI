@@ -268,7 +268,7 @@ The observation suggests loss of previously acquired skills (developmental regre
 
 This is a RED FLAG that requires prompt medical evaluation.
 
-YOU MUST include this safety section in your plan BEFORE the goals:
+YOU MUST include this safety section in your plan BEFORE the outcomes:
 
 ### 🚨 Important: Regression Concern
 
@@ -285,7 +285,7 @@ The strategies below provide supportive approaches while awaiting evaluation, bu
 
 ---
 
-Then proceed with generating Goals, Strategies, and Advice sections as usual.
+Then proceed with generating Outcomes, Strategies, and Advice sections as usual.
 
 IMPORTANT: Maintain supportive, non-alarmist tone while clearly communicating the need for medical evaluation.
 """

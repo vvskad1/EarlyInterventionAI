@@ -26,17 +26,17 @@ Respond with VALID JSON ONLY. No markdown, no extra text.
 
 Required JSON shape:
 {
-  "goals": [{"text": "...", "source": 1}],
+  "outcomes": [{"text": "...", "source": 1}],
   "strategies": [{"name": "...", "description": ["..."], "examples": ["..."], "routine": "...", "source": 1}],
   "advice": [{"text": "...", "source": 1}],
   "sources": [{"id": 1, "title": "...", "excerpt": ""}]
 }
 
 === CONTENT REQUIREMENTS ===
-- goals: 2-3 items; each MUST follow this template in the text field:
+- outcomes: 2-3 items; each MUST follow this template in the text field:
     "During [routine], child will [observable behavior] in [X out of Y opportunities OR duration] across [time window]"
     Example: "During floor play, child will maintain sitting balance for 30 seconds in 3 out of 4 opportunities across 2 weeks."
-    DO NOT write generic goals like "improve balance" or "demonstrate progress"
+    DO NOT write generic outcomes like "improve balance" or "demonstrate progress"
 - strategies: 3-5 items; each needs name, 2-3 description points, 2-4 concrete examples, routine frequency, source
 - advice: 4-6 practical parent-friendly items, each with source
 - sources: include every cited source id with EXACT title copied from [Source N] lines in RAG context

@@ -182,7 +182,7 @@ async def generate_plan(plan_req: PlanRequest):
     Generate an age-appropriate, domain-specific intervention plan.
     
     Uses RAG to ground recommendations in knowledge base content.
-    Returns structured JSON with Goals, Strategies, and Advice for Parents.
+    Returns structured JSON with Outcomes, Strategies, and Advice for Parents.
     
     Implements auto-retry with validation feedback if initial attempt fails quality checks.
     """
@@ -218,7 +218,7 @@ async def generate_plan(plan_req: PlanRequest):
             extra_context = f"{plan_req.notes}. {extra_context}" if extra_context else plan_req.notes
         
         # Use enhanced retrieval for plan generation
-        # This gets: milestones (Goals) + FGRBI techniques (Strategies) + family advice (Advice)
+        # This gets: milestones (Outcomes) + FGRBI techniques (Strategies) + family advice (Advice)
         context = rag.retrieve_for_plan_sections(
             age_months=plan_req.age_months,
             domain=domains_text,
@@ -287,11 +287,11 @@ async def generate_plan(plan_req: PlanRequest):
 
             if (
                 isinstance(response_json, dict)
-                and isinstance(response_json.get("goals"), list)
-                and len(response_json.get("goals", [])) == 0
-                and '"goals"' in response_text.lower()
+                and isinstance(response_json.get("outcomes"), list)
+                and len(response_json.get("outcomes", [])) == 0
+                and '"outcomes"' in response_text.lower()
             ):
-                print("[DEBUG] ⚠ JSON parse fallback detected: raw response included goals but parsed payload is empty")
+                print("[DEBUG] ⚠ JSON parse fallback detected: raw response included outcomes but parsed payload is empty")
 
             # Deterministic safety triage payload (cannot be omitted by LLM)
             safety_alert_payload = safety.build_safety_alert_payload(safety_analysis)
@@ -310,17 +310,17 @@ async def generate_plan(plan_req: PlanRequest):
             if context:
                 response_json = utils.normalize_sources_from_rag_context(response_json, context)
 
-            # Deterministically rewrite disallowed vocabulary-count goals
-            goals_before_sanitize = []
-            if isinstance(response_json.get("goals"), list):
-                goals_before_sanitize = [g.get("text", "") for g in response_json["goals"] if isinstance(g, dict)]
+            # Deterministically rewrite disallowed vocabulary-count outcomes
+            outcomes_before_sanitize = []
+            if isinstance(response_json.get("outcomes"), list):
+                outcomes_before_sanitize = [g.get("text", "") for g in response_json["outcomes"] if isinstance(g, dict)]
 
-            response_json = utils.sanitize_vocabulary_count_goals(response_json)
+            response_json = utils.sanitize_vocabulary_count_outcomes(response_json)
 
-            if isinstance(response_json.get("goals"), list):
-                goals_after_sanitize = [g.get("text", "") for g in response_json["goals"] if isinstance(g, dict)]
-                if goals_before_sanitize != goals_after_sanitize:
-                    print("[DEBUG] ✓ Sanitized count-based language goals into functional communication goals")
+            if isinstance(response_json.get("outcomes"), list):
+                outcomes_after_sanitize = [g.get("text", "") for g in response_json["outcomes"] if isinstance(g, dict)]
+                if outcomes_before_sanitize != outcomes_after_sanitize:
+                    print("[DEBUG] ✓ Sanitized count-based language outcomes into functional communication outcomes")
 
             # Deterministically enrich emotional-regulation content for tantrum/transition cases
             response_json = utils.enrich_emotional_regulation_content(
@@ -401,7 +401,7 @@ async def generate_plan(plan_req: PlanRequest):
                     validation_feedback.append(schema_msg)
             
             # Extract critical errors for feedback on next attempt if not already added
-            if not validation_feedback or not any("goal" in f.lower() or "strateg" in f.lower() for f in validation_feedback):
+            if not validation_feedback or not any("outcome" in f.lower() or "strateg" in f.lower() for f in validation_feedback):
                 for line in validation_report.split('\n'):
                     if line.strip().startswith('❌'):
                         validation_feedback.append(line.strip())
